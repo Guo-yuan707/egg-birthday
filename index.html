@@ -1782,36 +1782,73 @@ function switchMusicForScene(sceneNum) {
 }
 
 // ============================================
-// 初始化：首次用户交互时自动开启 BGM
+// 初始化：页面加载即自动播放 BGM
 // ============================================
 let bgmAutoStarted = false;
+
+async function tryAutoPlay() {
+  if (bgmAutoStarted) return;
+  bgmAutoStarted = true;
+
+  const ctx = getAudioCtx();
+
+  // 尝试直接播放（桌面端通常成功，移动端需 resume）
+  if (ctx.state === 'suspended') {
+    try {
+      await ctx.resume();
+    } catch (e) {
+      // resume 失败 → 等用户手势
+      bgmAutoStarted = false;
+      return;
+    }
+  }
+
+  // 检查是否真的启动了
+  if (ctx.state === 'running') {
+    setTimeout(() => {
+      playBirthdayMusic();
+      document.getElementById('musicToggle').textContent = '🎵';
+      // 移除手势监听（已成功）
+      document.removeEventListener('click', fallbackGesture);
+      document.removeEventListener('touchstart', fallbackGesture);
+    }, 80);
+  } else {
+    // 仍然 suspended → 等用户手势
+    bgmAutoStarted = false;
+  }
+}
+
+// 备用：用户手势触发（移动端兜底）
+function fallbackGesture() {
+  if (bgmAutoStarted) return;
+  initAutoBGM();
+}
 
 async function initAutoBGM() {
   if (bgmAutoStarted) return;
   bgmAutoStarted = true;
 
-  // 必须在用户手势回调内同步创建+resume AudioContext（手机浏览器严格要求）
   const ctx = getAudioCtx();
   if (ctx.state === 'suspended') {
-    await ctx.resume();
+    try { await ctx.resume(); } catch (e) {}
   }
 
-  // 给 AudioContext 一点时间完全启动
   setTimeout(() => {
     playBirthdayMusic();
     document.getElementById('musicToggle').textContent = '🎵';
   }, 50);
-
-  // 移除监听器
-  document.removeEventListener('click', initAutoBGM);
-  document.removeEventListener('touchstart', initAutoBGM);
-  document.removeEventListener('keydown', initAutoBGM);
 }
 
-// 全局监听首次交互
-document.addEventListener('click', initAutoBGM);
-document.addEventListener('touchstart', initAutoBGM);
-document.addEventListener('keydown', initAutoBGM);
+// 页面加载完成即尝试自动播放
+window.addEventListener('DOMContentLoaded', () => {
+  // 先尝试直接播放
+  setTimeout(tryAutoPlay, 100);
+});
+
+// 如果 autoplay 被挡，用户任意操作后启动
+document.addEventListener('click', fallbackGesture);
+document.addEventListener('touchstart', fallbackGesture);
+document.addEventListener('keydown', fallbackGesture);
 
 // BGM 按钮事件（切换开关）
 document.getElementById('musicToggle').addEventListener('click', async (e) => {
