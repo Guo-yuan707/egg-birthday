@@ -1518,7 +1518,7 @@ function clearMusicTimers() {
   musicOscillators = [];
 }
 
-// 生日快乐歌 BGM（场景1-3、5 使用）
+// 生日快乐歌 BGM（场景1-3、5 使用）— 温暖饱满
 function playBirthdayMusic() {
   if (musicPlaying && musicType === 'birthday') return;
   clearMusicTimers();
@@ -1540,23 +1540,33 @@ function playBirthdayMusic() {
       { freq: 523, dur: 0.5 }, { freq: 587, dur: 0.5 }, { freq: 523, dur: 0.8 },
     ];
 
+    function playNote(freq, startTime, duration, type, vol) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(vol, startTime + 0.02);
+      gain.gain.setValueAtTime(vol, startTime + duration * 0.75);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + duration + 0.05);
+    }
+
     let time = ctx.currentTime;
     function playLoop() {
       if (!musicPlaying || musicType !== 'birthday') return;
       time = ctx.currentTime;
       melody.forEach(note => {
         if (!note) { time += 0.35; return; }
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(note.freq, time);
-        gain.gain.setValueAtTime(0, time);
-        gain.gain.linearRampToValueAtTime(0.08, time + 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + note.dur);
-        osc.start(time);
-        osc.stop(time + note.dur + 0.05);
+        // 主旋律 triangle — 饱满音量
+        playNote(note.freq, time, note.dur, 'triangle', 0.16);
+        // 低八度 sine 做基底，增加温暖感
+        playNote(note.freq * 0.5, time, note.dur, 'sine', 0.07);
+        // 高八度 triangle 增加亮色
+        playNote(note.freq * 2, time, note.dur, 'triangle', 0.04);
         time += note.dur + 0.02;
       });
       musicOscillators.push(setTimeout(playLoop, (time - ctx.currentTime) * 1000));
@@ -1675,7 +1685,7 @@ function playGameMusic() {
       const src = ctx.createBufferSource();
       src.buffer = buffer;
       const gain = ctx.createGain();
-      gain.gain.setValueAtTime(type === 'snare' ? 0.6 : 0.35, startTime);
+      gain.gain.setValueAtTime(type === 'snare' ? 0.45 : 0.25, startTime);
       gain.gain.exponentialRampToValueAtTime(0.001, startTime + (type === 'snare' ? 0.06 : 0.03));
       src.connect(gain);
       gain.connect(ctx.destination);
@@ -1693,9 +1703,9 @@ function playGameMusic() {
       seqTime = now;
       leadMelody.forEach(n => {
         if (n) {
-          playNote(n.f, seqTime, n.d * 0.9, 'square', 0.05, undefined);
-          // harmony 5th above (chiptune staple)
-          playNote(n.f * 1.5, seqTime, n.d * 0.85, 'triangle', 0.018, undefined);
+          playNote(n.f, seqTime, n.d * 0.9, 'square', 0.04, undefined);
+          // harmony 5th above
+          playNote(n.f * 1.5, seqTime, n.d * 0.85, 'triangle', 0.014, undefined);
         }
         seqTime += n ? n.d : eighth;
       });
@@ -1704,12 +1714,12 @@ function playGameMusic() {
       seqTime = now;
       bassLine.forEach(n => {
         if (n) {
-          playNote(n.f, seqTime, n.d * 0.85, 'sawtooth', 0.06, undefined);
+          playNote(n.f, seqTime, n.d * 0.85, 'sawtooth', 0.05, undefined);
         }
         seqTime += n ? n.d : beat;
       });
 
-      // 和弦点缀（每两拍一个短促和弦，增加厚度）
+      // 和弦点缀
       const chordPattern = [
         { notes: [523, 659, 784], pos: 0 },
         { notes: [523, 659, 784], pos: beat * 2 },
@@ -1730,7 +1740,7 @@ function playGameMusic() {
       ];
       chordPattern.forEach(c => {
         c.notes.forEach(nf => {
-          playNote(nf, now + c.pos, beat * 1.6, 'triangle', 0.03, undefined);
+          playNote(nf, now + c.pos, beat * 1.6, 'triangle', 0.022, undefined);
         });
       });
 
