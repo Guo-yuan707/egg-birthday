@@ -159,6 +159,87 @@ html, body {
   95% { transform: scaleY(0.08); }
 }
 
+/* ============================================
+   毛毛虫小伙伴 — 虫虫
+   ============================================ */
+.caterpillar-wrapper {
+  display: flex; align-items: flex-end; gap: 6px;
+  position: relative;
+}
+.caterpillar {
+  position: relative;
+  display: flex; flex-direction: row;
+  align-items: center;
+}
+/* 虫身体：5个彩色圆环 */
+.caterpillar .worm-seg {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  margin-left: -3px;
+  transition: transform 0.2s ease;
+}
+.caterpillar .worm-seg:first-child { margin-left: 0; }
+.caterpillar .worm-seg:nth-child(1) { background: #66BB6A; }
+.caterpillar .worm-seg:nth-child(2) { background: #43A047; }
+.caterpillar .worm-seg:nth-child(3) { background: #81C784; }
+.caterpillar .worm-seg:nth-child(4) { background: #388E3C; }
+.caterpillar .worm-seg:nth-child(5) { background: #A5D6A7; }
+
+/* 虫虫的脸（第一个节） */
+.caterpillar .worm-head {
+  position: relative;
+  width: 20px; height: 20px;
+  background: #66BB6A;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+/* 眼睛 */
+.caterpillar .worm-head::before {
+  content: '';
+  position: absolute;
+  top: 4px; left: 4px;
+  width: 6px; height: 6px;
+  background: #1B5E20; border-radius: 50%;
+  box-shadow: 8px 0 0 0 #1B5E20;
+}
+/* 微笑 */
+.caterpillar .worm-head::after {
+  content: '';
+  position: absolute;
+  top: 11px; left: 50%; transform: translateX(-50%);
+  width: 6px; height: 3px;
+  border-bottom: 1.5px solid #1B5E20;
+  border-radius: 0 0 50% 50%;
+}
+/* 小触角 */
+.caterpillar .worm-antennae {
+  position: absolute;
+  top: -3px; left: 50%; transform: translateX(-50%);
+  width: 8px; display: flex; justify-content: space-between;
+}
+.caterpillar .worm-antenna {
+  width: 2px; height: 6px;
+  background: #66BB6A;
+  border-radius: 1px;
+}
+.caterpillar .worm-antenna::after {
+  content: ''; position: absolute;
+  top: -2px; width: 3px; height: 3px;
+  background: #66BB6A; border-radius: 50%;
+}
+/* 蠕动画 */
+@keyframes crawl {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-4px); }
+  60% { transform: translateY(1px); }
+}
+.caterpillar { animation: crawl 0.8s ease-in-out infinite; }
+
+/* 场景1蛋仔+虫虫并排 */
+.egg-caterpillar-group {
+  display: flex; align-items: flex-end; gap: 4px;
+}
+
 /* 弹跳动画 */
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
@@ -312,7 +393,7 @@ html, body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  max-width: 280px;
+  max-width: 300px;
   margin: 0 auto;
 }
 .gift-box {
@@ -330,7 +411,8 @@ html, body {
 .gift-box:nth-child(2) { background: var(--sky-blue); animation-delay: 0.5s; }
 .gift-box:nth-child(3) { background: var(--green); animation-delay: 1s; }
 .gift-box:nth-child(4) { background: var(--orange); animation-delay: 1.5s; }
-.gift-box:nth-child(5) { background: var(--purple); animation-delay: 0.3s; grid-column: 1 / -1; width: 100%; }
+.gift-box:nth-child(5) { background: var(--purple); animation-delay: 0.3s; }
+.gift-box:nth-child(6) { background: var(--green); animation-delay: 1.8s; }
 
 .gift-box:active { transform: scale(0.92); }
 .gift-box.opened {
@@ -546,17 +628,32 @@ html, body {
 
 <!-- ==================== 场景1：开场 ==================== -->
 <div class="scene active" id="scene1">
-  <div class="egg-character">
-    <div class="egg-eyes">
-      <div class="egg-eye"></div>
-      <div class="egg-eye"></div>
+  <div class="egg-caterpillar-group">
+    <div class="egg-character">
+      <div class="egg-eyes">
+        <div class="egg-eye"></div>
+        <div class="egg-eye"></div>
+      </div>
+      <div class="egg-blush left"></div>
+      <div class="egg-blush right"></div>
+      <div class="egg-mouth"></div>
+      <div class="egg-feet">
+        <div class="egg-foot"></div>
+        <div class="egg-foot"></div>
+      </div>
     </div>
-    <div class="egg-blush left"></div>
-    <div class="egg-blush right"></div>
-    <div class="egg-mouth"></div>
-    <div class="egg-feet">
-      <div class="egg-foot"></div>
-      <div class="egg-foot"></div>
+    <!-- 虫虫小伙伴 -->
+    <div class="caterpillar" style="margin-bottom:6px;">
+      <div class="worm-head" style="position:relative;">
+        <div class="worm-antennae">
+          <div class="worm-antenna" style="position:relative;"></div>
+          <div class="worm-antenna" style="position:relative;"></div>
+        </div>
+      </div>
+      <div class="worm-seg"></div>
+      <div class="worm-seg"></div>
+      <div class="worm-seg"></div>
+      <div class="worm-seg"></div>
     </div>
   </div>
   <h1 class="opening-title">🎉 何林溪<br>有你的包裹！</h1>
@@ -590,6 +687,19 @@ html, body {
       <div class="cake-layer bottom"><div class="cake-frosting"></div></div>
     </div>
   </div>
+  <!-- 虫虫在蛋糕旁边 -->
+  <div class="caterpillar" style="margin-top:8px;">
+    <div class="worm-head" style="position:relative;">
+      <div class="worm-antennae">
+        <div class="worm-antenna" style="position:relative;"></div>
+        <div class="worm-antenna" style="position:relative;"></div>
+      </div>
+    </div>
+    <div class="worm-seg"></div>
+    <div class="worm-seg"></div>
+    <div class="worm-seg"></div>
+    <div class="worm-seg"></div>
+  </div>
   <p class="cake-msg" id="cakeMsg">还剩 8 根蜡烛 🕯️</p>
   <button class="btn btn-egg" id="cakeNextBtn" style="display:none;margin-top:8px;" onclick="goToScene(3)">
     🎁 去拆礼物 →
@@ -606,6 +716,7 @@ html, body {
     <div class="gift-box" data-gift="2" onclick="openGift(2)">🎈<span class="gift-label">戳我</span></div>
     <div class="gift-box" data-gift="3" onclick="openGift(3)">🎊<span class="gift-label">戳我</span></div>
     <div class="gift-box" data-gift="4" onclick="openGift(4)">💝<span class="gift-label">最大奖</span></div>
+    <div class="gift-box" data-gift="5" onclick="openGift(5)">🐛<span class="gift-label">虫虫彩蛋</span></div>
   </div>
   <div class="gift-overlay" id="giftOverlay" onclick="closeGift()"></div>
   <div class="gift-blessing" id="giftBlessing">
@@ -865,11 +976,12 @@ function stopMic() {
 // 场景3：礼物盲盒
 // ============================================
 const blessings = [
-  { emoji: '🎂', text: '何林溪，生日快乐！\n愿你的每一天都像蛋糕一样甜蜜～' },
-  { emoji: '🥚', text: '愿你像蛋仔一样\n圆滚滚、可可爱爱\n永远充满活力！' },
-  { emoji: '🌟', text: '8岁啦！\n你是世界上最棒的小朋友\n勇敢又善良！' },
+  { emoji: '🎂', text: '虫虫，生日快乐！\n愿你的每一天都像蛋糕一样甜蜜～' },
+  { emoji: '🥚', text: '愿你和蛋仔一样\n圆滚滚、可可爱爱\n永远充满活力！' },
+  { emoji: '🌟', text: '8岁啦，虫虫！\n你是世界上最棒的小朋友\n勇敢又善良！' },
   { emoji: '🎮', text: '愿你的生活像蛋仔派对一样\n每一局都精彩\n每一关都通关！' },
   { emoji: '💖', text: '所有的愿望都会实现哦～\n健康快乐地长大\n我们永远爱你！❤️' },
+  { emoji: '🐛', text: '虫虫——\n这个昵称超可爱的！\n像毛毛虫一样，一步一步\n走向大大的世界 🌿' },
 ];
 let giftsOpened = 0;
 const giftsOpenedSet = new Set();
@@ -891,7 +1003,7 @@ function openGift(index) {
   document.getElementById('giftOverlay').classList.add('show');
   popSound(800);
 
-  if (giftsOpened >= 5) {
+  if (giftsOpened >= 6) {
     document.getElementById('giftNextBtn').style.display = 'inline-block';
     setTimeout(createConfetti, 500);
   }
@@ -1152,21 +1264,23 @@ document.addEventListener('DOMContentLoaded', () => {
 // 场景5：祝福墙
 // ============================================
 const blessingMessages = [
-  '🎂 何林溪，生日快乐！',
+  '🎂 虫虫，生日快乐！',
   '🥚 像蛋仔一样元气满满！',
-  '🌟 8岁啦！越来越棒！',
+  '🌟 虫虫8岁啦！越来越棒！',
   '💪 健康成长，天天向上！',
   '🍰 蛋糕吃多多，快乐加加倍！',
   '🎮 蛋仔派对把把都通关！',
   '🎁 所有愿望都会实现！',
-  '⭐ 你是最闪亮的小星星！',
+  '⭐ 虫虫是最闪亮的小星星！',
+  '🐛 虫虫像毛毛虫一样勇敢前行！',
   '🎉 新的一岁，新的冒险！',
   '💖 保持好奇心，永远快乐！',
-  '🏆 学习进步，快乐成长！',
+  '🏆 虫虫加油，学习进步！',
   '🦸 做自己的超级英雄！',
   '🍭 生活比糖果还要甜！',
-  '🚀 梦想起飞，飞得高高！',
+  '🚀 虫虫的梦想，飞得高高！',
   '🎨 画出属于自己的精彩世界！',
+  '🌿 虫虫，慢慢长大慢慢发光！',
 ];
 
 function startBlessingWall() {
@@ -1504,7 +1618,7 @@ function celebrateEnding() {
   const blessing = document.getElementById('giftBlessing');
   blessing.classList.add('final');
   document.getElementById('blessingEmoji').textContent = '🎂🥚🎉';
-  document.getElementById('blessingText').textContent = '何林溪，8岁生日快乐！\n\n愿蛋仔的快乐永远陪伴你\n健康、勇敢、闪闪发光！✨';
+  document.getElementById('blessingText').textContent = '虫虫（何林溪），8岁生日快乐！\n\n愿蛋仔的快乐永远陪伴你\n健康、勇敢、闪闪发光！✨';
   blessing.classList.add('show');
   document.getElementById('giftOverlay').classList.add('show');
 }
