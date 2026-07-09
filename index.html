@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎂 何林溪的蛋仔生日派对</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥚</text></svg>">
+<style>
+/* ============================================
+   蛋仔生日派对 — 全局样式
+   ============================================ */
+:root {
+  --egg-yellow: #FFD54F;
+  --egg-yellow-dark: #F9A825;
+  --party-pink: #FF6B9D;
+  --sky-blue: #64B5F6;
+  --sky-blue-light: #90CAF9;
+  --white: #FFF8E1;
+  --bg: #FFF9E6;
+  --text: #5D4037;
+  --green: #81C784;
+  --orange: #FFB74D;
+  --purple: #CE93D8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 背景粒子画布 */
+#particleCanvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+
+/* 场景容器 */
+.scene {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  pointer-events: none; z-index: 1;
+  padding: 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.scene.active {
+  opacity: 1; transform: translateY(0);
+  pointer-events: auto;
+}
+.scene.exit-up {
+  opacity: 0; transform: translateY(-40px);
+}
+
+/* ============================================
+   CSS 蛋仔角色
+   ============================================ */
+.egg-character {
+  position: relative;
+  width: 70px; height: 88px;
+  background: linear-gradient(180deg, #FFE082 0%, #FFD54F 40%, #F9A825 100%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow:
+    inset -8px -4px 12px rgba(0,0,0,0.08),
+    inset 4px -8px 16px rgba(0,0,0,0.06),
+    0 4px 12px rgba(0,0,0,0.12);
+}
+.egg-character::before {
+  content: '';
+  position: absolute;
+  top: 8px; left: 50%; transform: translateX(-50%);
+  width: 34px; height: 16px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 50%;
+}
+/* 眼睛 */
+.egg-eyes { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 44px; display: flex; justify-content: space-between; }
+.egg-eye {
+  width: 12px; height: 14px;
+  background: #3E2723; border-radius: 50%;
+  position: relative;
+  animation: blink 3s infinite;
+}
+.egg-eye::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 4px; height: 4px;
+  background: white; border-radius: 50%;
+}
+/* 腮红 */
+.egg-blush {
+  position: absolute;
+  top: 36px;
+  width: 12px; height: 7px;
+  background: rgba(255,154,162,0.6);
+  border-radius: 50%;
+}
+.egg-blush.left { left: 8px; }
+.egg-blush.right { right: 8px; }
+/* 嘴巴 */
+.egg-mouth {
+  position: absolute;
+  top: 40px; left: 50%; transform: translateX(-50%);
+  width: 10px; height: 5px;
+  border-bottom: 2px solid #BF7B5A;
+  border-radius: 0 0 50% 50%;
+}
+/* 小脚 */
+.egg-feet {
+  position: absolute;
+  bottom: -6px; left: 50%; transform: translateX(-50%);
+  width: 32px; display: flex; justify-content: space-between;
+}
+.egg-foot {
+  width: 12px; height: 8px;
+  background: #F9A825;
+  border-radius: 50% 50% 30% 30%;
+}
+
+@keyframes blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+/* 弹跳动画 */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-60px); }
+  50% { transform: translateY(0); }
+  70% { transform: translateY(-25px); }
+  85% { transform: translateY(0); }
+}
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+/* ============================================
+   场景1：开场动画
+   ============================================ */
+#scene1 { background: linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 50%, #FFF9E6 100%); }
+#scene1 .egg-character {
+  animation: dropIn 1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards,
+             wobble 0.5s ease-in-out 1s 3;
+  width: 90px; height: 112px;
+}
+@keyframes dropIn {
+  0% { transform: translateY(-120vh); opacity: 0; }
+  60% { transform: translateY(-20px); opacity: 1; }
+  80% { transform: translateY(10px); }
+  100% { transform: translateY(0); }
+}
+.opening-title {
+  font-size: 28px; font-weight: 900;
+  color: var(--party-pink);
+  text-align: center;
+  margin-top: 24px;
+  text-shadow: 2px 2px 0 rgba(255,255,255,0.8);
+  animation: fadeInUp 1s ease 0.5s both;
+}
+.opening-subtitle {
+  font-size: 16px; color: var(--text);
+  margin-top: 8px;
+  animation: fadeInUp 1s ease 0.7s both;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   场景2：生日蛋糕 + 吹蜡烛
+   ============================================ */
+#scene2 { background: linear-gradient(180deg, #FFF9E6 0%, #FFE0B2 50%, #FFCC80 100%); }
+.cake-container { position: relative; margin: 70px 0 20px; }
+.cake {
+  position: relative;
+  width: 180px;
+}
+/* 蛋糕层 */
+.cake-layer {
+  width: 100%; border-radius: 12px;
+  position: relative;
+}
+.cake-layer.bottom {
+  height: 50px; background: linear-gradient(180deg, #FFE082, #FFD54F);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.cake-layer.middle {
+  height: 40px; width: 85%; margin: -2px auto 0;
+  background: linear-gradient(180deg, #FFCC80, #FFB74D);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+.cake-layer.top {
+  height: 30px; width: 68%; margin: -2px auto 0;
+  background: linear-gradient(180deg, #FFAB91, #FF8A65);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+/* 奶油装饰 */
+.cake-frosting {
+  position: absolute; top: -6px; left: -4px; right: -4px;
+  height: 14px;
+  background: radial-gradient(ellipse at center, #FFF 60%, #FFF8E1 100%);
+  border-radius: 20px;
+}
+/* 蛋仔 on top */
+.cake-egg {
+  position: absolute; top: -70px; left: 50%; transform: translateX(-50%);
+  width: 50px; height: 62px;
+  background: linear-gradient(180deg, #FFE082 0%, #FFD54F 40%, #F9A825 100%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+/* 蜡烛 */
+.candles-area {
+  display: flex; justify-content: center; gap: 10px;
+  position: absolute; top: -55px; left: 50%; transform: translateX(-50%);
+  width: 100%;
+}
+.candle {
+  position: relative;
+  width: 10px; height: 36px;
+  background: linear-gradient(180deg, #FF6B9D, #E91E63);
+  border-radius: 4px 4px 2px 2px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+.candle.blown {
+  background: #BDBDBD;
+  transform: translateY(4px);
+}
+.candle:nth-child(odd) { background: linear-gradient(180deg, #64B5F6, #2196F3); }
+.candle:nth-child(odd).blown { background: #BDBDBD; }
+.candle-flame {
+  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  width: 10px; height: 16px;
+  background: radial-gradient(ellipse at center, #FFF 20%, #FF9800 60%, #F44336 100%);
+  border-radius: 50% 50% 30% 30%;
+  animation: flicker 0.3s ease-in-out infinite alternate;
+  transition: opacity 0.2s ease;
+}
+.candle.blown .candle-flame { opacity: 0; animation: none; }
+@keyframes flicker {
+  0% { transform: translateX(-50%) scale(1, 1) rotate(-2deg); }
+  100% { transform: translateX(-50%) scale(1.1, 0.9) rotate(2deg); }
+}
+
+.cake-msg {
+  font-size: 15px; color: var(--text);
+  text-align: center; margin-top: 70px;
+  font-weight: 600;
+}
+
+/* ============================================
+   场景3：拆礼物盲盒
+   ============================================ */
+#scene3 { background: linear-gradient(180deg, #F3E5F5 0%, #E1BEE7 30%, #FFF9E6 100%); }
+.gifts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 280px;
+  margin: 0 auto;
+}
+.gift-box {
+  width: 120px; height: 120px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  animation: float 3s ease-in-out infinite;
+}
+.gift-box:nth-child(1) { background: var(--party-pink); animation-delay: 0s; }
+.gift-box:nth-child(2) { background: var(--sky-blue); animation-delay: 0.5s; }
+.gift-box:nth-child(3) { background: var(--green); animation-delay: 1s; }
+.gift-box:nth-child(4) { background: var(--orange); animation-delay: 1.5s; }
+.gift-box:nth-child(5) { background: var(--purple); animation-delay: 0.3s; grid-column: 1 / -1; width: 100%; }
+
+.gift-box:active { transform: scale(0.92); }
+.gift-box.opened {
+  animation: none;
+  transform: scale(1.1);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+}
+.gift-box .gift-label {
+  position: absolute; bottom: 8px;
+  font-size: 12px; color: white;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.gift-blessing {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+  background: white;
+  border-radius: 20px;
+  padding: 30px 24px;
+  text-align: center;
+  z-index: 100;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  min-width: 260px;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: auto;
+}
+.gift-blessing.show { transform: translate(-50%, -50%) scale(1); }
+.gift-blessing .blessing-emoji { font-size: 56px; display: block; margin-bottom: 12px; }
+.gift-blessing .blessing-text { font-size: 17px; color: var(--text); line-height: 1.6; font-weight: 600; }
+.gift-blessing .close-btn {
+  margin-top: 16px; padding: 8px 24px;
+  background: var(--party-pink); color: white;
+  border: none; border-radius: 20px;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer;
+}
+.gift-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.45); z-index: 99;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.gift-overlay.show { opacity: 1; pointer-events: auto; }
+
+/* ============================================
+   场景4：接蛋糕小游戏
+   ============================================ */
+#scene4 { background: linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 50%, #FFF9E6 100%); padding: 10px; }
+.game-header {
+  display: flex; justify-content: space-between;
+  width: 100%; max-width: 400px;
+  padding: 8px 16px;
+  font-weight: 800; font-size: 16px;
+}
+.game-score { color: var(--party-pink); }
+.game-timer { color: var(--sky-blue); }
+#gameCanvas {
+  width: 100%; max-width: 400px;
+  height: min(320px, 38vh);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #E3F2FD, #BBDEFB);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  cursor: pointer;
+  touch-action: none;
+}
+.game-controls {
+  margin-top: 12px;
+  display: flex; gap: 12px;
+}
+.game-btn {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: none;
+  font-size: 28px;
+  background: white;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.game-btn:active { transform: scale(0.9); }
+
+/* ============================================
+   场景5：祝福墙
+   ============================================ */
+#scene5 { background: linear-gradient(180deg, #FFF9E6 0%, #FFE0B2 50%, #FFCC80 100%); }
+.blessing-wall {
+  width: 100%; height: 60%;
+  position: relative;
+  overflow: hidden;
+}
+.blessing-bubble {
+  position: absolute;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: floatUp linear forwards;
+}
+@keyframes floatUp {
+  0% { transform: translateY(110%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-110%); opacity: 0; }
+}
+
+/* ============================================
+   通用按钮 & 导航
+   ============================================ */
+.btn {
+  display: inline-block;
+  padding: 14px 40px;
+  border-radius: 30px;
+  border: none;
+  font-size: 18px; font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  letter-spacing: 1px;
+}
+.btn:active { transform: scale(0.95); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--party-pink), #FF4081);
+  color: white;
+}
+.btn-secondary {
+  background: linear-gradient(135deg, var(--sky-blue), #42A5F5);
+  color: white;
+}
+.btn-egg {
+  background: linear-gradient(135deg, var(--egg-yellow), var(--egg-yellow-dark));
+  color: var(--text);
+}
+
+.scene-title {
+  font-size: 22px; font-weight: 900;
+  color: var(--party-pink);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.scene-desc {
+  font-size: 14px; color: #8D6E63;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* 进度指示器 */
+.progress-dots {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 10px; z-index: 10;
+}
+.progress-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #DDD;
+  transition: all 0.3s ease;
+}
+.progress-dot.active {
+  background: var(--party-pink);
+  width: 28px; border-radius: 5px;
+}
+.progress-dot.done { background: var(--green); }
+
+/* BGM 按钮 */
+.music-toggle {
+  position: fixed; top: 16px; right: 16px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 20;
+  transition: transform 0.2s ease;
+}
+.music-toggle:active { transform: scale(0.9); }
+
+/* 彩带庆祝效果容器 */
+.confetti-container {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 50;
+}
+
+/* ============================================
+   响应式
+   ============================================ */
+@media (min-width: 600px) {
+  .egg-character { width: 100px; height: 124px; }
+  .cake { width: 240px; }
+  .gifts-grid { max-width: 400px; gap: 24px; }
+  .gift-box { width: 150px; height: 150px; font-size: 60px; }
+  #gameCanvas { height: min(400px, 45vh); }
+}
+</style>
+</head>
+<body>
+
+<!-- 背景粒子画布 -->
+<canvas id="particleCanvas"></canvas>
+
+<!-- 彩带容器 -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<!-- BGM 按钮 -->
+<button class="music-toggle" id="musicToggle" title="音乐">🔇</button>
+
+<!-- ==================== 场景1：开场 ==================== -->
+<div class="scene active" id="scene1">
+  <div class="egg-character">
+    <div class="egg-eyes">
+      <div class="egg-eye"></div>
+      <div class="egg-eye"></div>
+    </div>
+    <div class="egg-blush left"></div>
+    <div class="egg-blush right"></div>
+    <div class="egg-mouth"></div>
+    <div class="egg-feet">
+      <div class="egg-foot"></div>
+      <div class="egg-foot"></div>
+    </div>
+  </div>
+  <h1 class="opening-title">🎉 何林溪<br>有你的包裹！</h1>
+  <p class="opening-subtitle">一个神秘蛋仔快递 📦</p>
+  <button class="btn btn-primary" style="margin-top:28px;" onclick="goToScene(2)">
+    🎁 打开看看
+  </button>
+</div>
+
+<!-- ==================== 场景2：蛋糕吹蜡烛 ==================== -->
+<div class="scene" id="scene2">
+  <div class="scene-title">🎂 生日快乐！</div>
+  <div class="scene-desc">把 8 根蜡烛吹灭吧～（点击蜡烛或对着麦克风吹气）</div>
+  <div class="cake-container">
+    <div class="cake">
+      <!-- 蛋仔 -->
+      <div class="cake-egg" id="cakeEgg">
+        <div class="egg-eyes" style="top:14px;width:32px;">
+          <div class="egg-eye" style="width:9px;height:11px;"></div>
+          <div class="egg-eye" style="width:9px;height:11px;"></div>
+        </div>
+        <div class="egg-blush left" style="top:28px;left:5px;width:9px;height:5px;"></div>
+        <div class="egg-blush right" style="top:28px;right:5px;width:9px;height:5px;"></div>
+        <div class="egg-mouth" style="top:30px;width:7px;height:4px;"></div>
+      </div>
+      <!-- 蜡烛 -->
+      <div class="candles-area" id="candlesArea"></div>
+      <!-- 蛋糕层 -->
+      <div class="cake-layer top"><div class="cake-frosting"></div></div>
+      <div class="cake-layer middle"><div class="cake-frosting"></div></div>
+      <div class="cake-layer bottom"><div class="cake-frosting"></div></div>
+    </div>
+  </div>
+  <p class="cake-msg" id="cakeMsg">还剩 8 根蜡烛 🕯️</p>
+  <button class="btn btn-egg" id="cakeNextBtn" style="display:none;margin-top:8px;" onclick="goToScene(3)">
+    🎁 去拆礼物 →
+  </button>
+</div>
+
+<!-- ==================== 场景3：拆礼物 ==================== -->
+<div class="scene" id="scene3">
+  <div class="scene-title">🎁 拆礼物时间！</div>
+  <div class="scene-desc">点击礼物盒，看看里面有什么～</div>
+  <div class="gifts-grid">
+    <div class="gift-box" data-gift="0" onclick="openGift(0)">🎁<span class="gift-label">戳我</span></div>
+    <div class="gift-box" data-gift="1" onclick="openGift(1)">🎀<span class="gift-label">戳我</span></div>
+    <div class="gift-box" data-gift="2" onclick="openGift(2)">🎈<span class="gift-label">戳我</span></div>
+    <div class="gift-box" data-gift="3" onclick="openGift(3)">🎊<span class="gift-label">戳我</span></div>
+    <div class="gift-box" data-gift="4" onclick="openGift(4)">💝<span class="gift-label">最大奖</span></div>
+  </div>
+  <div class="gift-overlay" id="giftOverlay" onclick="closeGift()"></div>
+  <div class="gift-blessing" id="giftBlessing">
+    <span class="blessing-emoji" id="blessingEmoji"></span>
+    <p class="blessing-text" id="blessingText"></p>
+    <button class="close-btn" onclick="closeGift()">收到！❤️</button>
+  </div>
+  <button class="btn btn-secondary" id="giftNextBtn" style="display:none;margin-top:20px;" onclick="goToScene(4)">
+    🎮 来玩个游戏 →
+  </button>
+</div>
+
+<!-- ==================== 场景4：接蛋糕小游戏 ==================== -->
+<div class="scene" id="scene4">
+  <div class="scene-title">🎮 蛋仔接蛋糕</div>
+  <div class="scene-desc">左右移动蛋仔，接住掉落的蛋糕吧！</div>
+  <div class="game-header">
+    <span class="game-score">⭐ 得分：<span id="gameScore">0</span></span>
+    <span class="game-timer">⏱️ <span id="gameTimer">30</span>s</span>
+  </div>
+  <canvas id="gameCanvas"></canvas>
+  <div class="game-controls">
+    <button class="game-btn" id="btnLeft" ontouchstart="gameMove(-1)" onmousedown="gameMove(-1)" ontouchend="gameMove(0)" onmouseup="gameMove(0)">⬅️</button>
+    <button class="game-btn" onclick="startGame()" id="gameStartBtn">▶️</button>
+    <button class="game-btn" id="btnRight" ontouchstart="gameMove(1)" onmousedown="gameMove(1)" ontouchend="gameMove(0)" onmouseup="gameMove(0)">➡️</button>
+  </div>
+  <p style="margin-top:8px;font-size:12px;color:#999;">💡 也可以用键盘 ← → 控制</p>
+  <button class="btn btn-primary" id="gameNextBtn" style="display:none;margin-top:12px;" onclick="goToScene(5)">
+    💌 查看祝福 →
+  </button>
+</div>
+
+<!-- ==================== 场景5：祝福墙 ==================== -->
+<div class="scene" id="scene5">
+  <div class="scene-title">💌 给你的祝福</div>
+  <div class="scene-desc">这些都是送给何林溪的生日祝福哦～</div>
+  <div class="blessing-wall" id="blessingWall"></div>
+  <button class="btn btn-egg" style="margin-top:20px;" onclick="celebrateEnding()">
+    🎉 生日快乐！
+  </button>
+  <p style="margin-top:12px;font-size:13px;color:#999;">
+    🥚 爱你的家人 · 2026 · 蛋仔派对主题生日 🎂
+  </p>
+</div>
+
+<!-- 进度指示器 -->
+<div class="progress-dots" id="progressDots">
+  <div class="progress-dot active" data-dot="1"></div>
+  <div class="progress-dot" data-dot="2"></div>
+  <div class="progress-dot" data-dot="3"></div>
+  <div class="progress-dot" data-dot="4"></div>
+  <div class="progress-dot" data-dot="5"></div>
+</div>
+
+<script>
+// ============================================
+// 全局状态
+// ============================================
+let currentScene = 1;
+const totalScenes = 5;
+const sceneBlown = [false, false, false, false, false];
+
+// ============================================
+// 场景导航
+// ============================================
+let blessingWallInterval = null;
+
+function goToScene(n) {
+  if (n < 1 || n > totalScenes) return;
+  if (n === currentScene) return;
+  if (n < currentScene) return; // 不允许后退
+
+  // === 清理旧场景 ===
+  // 场景2：停止麦克风
+  if (currentScene === 2) stopMic();
+  // 场景4：停止游戏
+  if (currentScene === 4) {
+    gameRunning = false;
+    if (gameTimerId) { clearInterval(gameTimerId); gameTimerId = null; }
+    if (gameAnimId) { cancelAnimationFrame(gameAnimId); gameAnimId = null; }
+  }
+  // 场景3：关闭礼物弹窗
+  if (currentScene === 3) closeGift();
+  if (currentScene === 5 && blessingWallInterval) {
+    clearInterval(blessingWallInterval);
+    blessingWallInterval = null;
+  }
+
+  const oldScene = document.getElementById('scene' + currentScene);
+  const newScene = document.getElementById('scene' + n);
+
+  oldScene.classList.remove('active');
+  oldScene.classList.add('exit-up');
+  setTimeout(() => oldScene.classList.remove('exit-up'), 600);
+
+  newScene.classList.add('active');
+  currentScene = n;
+
+  // 更新进度点
+  document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+    dot.classList.remove('active', 'done');
+    if (i + 1 < n) dot.classList.add('done');
+    if (i + 1 === n) dot.classList.add('active');
+  });
+
+  // 进入场景时的特殊逻辑
+  if (n === 2) initCandles();
+  if (n === 3) { document.getElementById('giftNextBtn').style.display = 'none'; }
+  if (n === 4) initGame();
+  if (n === 5) startBlessingWall();
+
+  // 滚动到顶部（mobile）
+  window.scrollTo(0, 0);
+}
+
+// ============================================
+// 背景粒子系统
+// ============================================
+const particleCanvas = document.getElementById('particleCanvas');
+const pctx = particleCanvas.getContext('2d');
+let particles = [];
+
+function resizeParticleCanvas() {
+  particleCanvas.width = window.innerWidth;
+  particleCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeParticleCanvas);
+resizeParticleCanvas();
+
+function createParticle() {
+  return {
+    x: Math.random() * particleCanvas.width,
+    y: -10,
+    radius: Math.random() * 3 + 1,
+    speed: Math.random() * 1.5 + 0.5,
+    opacity: Math.random() * 0.6 + 0.2,
+    color: ['#FFD54F','#FF6B9D','#64B5F6','#81C784','#CE93D8','#FFB74D'][Math.floor(Math.random()*6)],
+    wobble: Math.random() * 2 - 1
+  };
+}
+
+for (let i = 0; i < 30; i++) {
+  const p = createParticle();
+  p.y = Math.random() * particleCanvas.height;
+  particles.push(p);
+}
+
+function animateParticles() {
+  pctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+  particles.forEach(p => {
+    p.y += p.speed;
+    p.x += p.wobble * 0.3;
+    if (p.y > particleCanvas.height + 10) {
+      p.y = -10;
+      p.x = Math.random() * particleCanvas.width;
+    }
+    pctx.beginPath();
+    pctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    pctx.fillStyle = p.color;
+    pctx.globalAlpha = p.opacity;
+    pctx.fill();
+  });
+  pctx.globalAlpha = 1;
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ============================================
+// 场景2：蜡烛
+// ============================================
+let candlesBlown = 0;
+let micStream = null;
+
+function initCandles() {
+  candlesBlown = 0;
+  const area = document.getElementById('candlesArea');
+  area.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const candle = document.createElement('div');
+    candle.className = 'candle';
+    candle.innerHTML = '<div class="candle-flame"></div>';
+    candle.onclick = (e) => {
+      e.stopPropagation();
+      blowCandle(candle);
+    };
+    area.appendChild(candle);
+  }
+  document.getElementById('cakeMsg').textContent = '还剩 8 根蜡烛 🕯️';
+  document.getElementById('cakeNextBtn').style.display = 'none';
+  document.getElementById('cakeEgg').style.animation = '';
+  setupMicBlow();
+}
+
+function blowCandle(candle) {
+  if (candle.classList.contains('blown')) return;
+  candle.classList.add('blown');
+  candlesBlown++;
+  const left = 8 - candlesBlown;
+  const msg = document.getElementById('cakeMsg');
+  if (left > 0) {
+    msg.textContent = `还剩 ${left} 根蜡烛 🕯️ 加油！`;
+    popSound(600);
+  } else {
+    msg.textContent = '🎉 全部吹灭啦！生日快乐何林溪！';
+    document.getElementById('cakeNextBtn').style.display = 'inline-block';
+    document.getElementById('cakeEgg').style.animation = 'bounce 0.6s ease 3';
+    stopMic();
+    createConfetti();
+    celebrateSound();
+  }
+}
+
+async function setupMicBlow() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaStreamSource(micStream);
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function checkBlow() {
+      if (currentScene !== 2 || candlesBlown >= 8) {
+        if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+        return;
+      }
+      analyser.getByteFrequencyData(dataArray);
+      const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+      if (avg > 55) {
+        const candles = document.querySelectorAll('#candlesArea .candle:not(.blown)');
+        if (candles.length > 0) {
+          blowCandle(candles[Math.floor(Math.random() * candles.length)]);
+        }
+      }
+      requestAnimationFrame(checkBlow);
+    }
+    checkBlow();
+  } catch (e) {
+    console.log('麦克风未授权，使用点击模式');
+  }
+}
+
+function stopMic() {
+  if (micStream) {
+    micStream.getTracks().forEach(t => t.stop());
+    micStream = null;
+  }
+}
+
+// ============================================
+// 场景3：礼物盲盒
+// ============================================
+const blessings = [
+  { emoji: '🎂', text: '何林溪，生日快乐！\n愿你的每一天都像蛋糕一样甜蜜～' },
+  { emoji: '🥚', text: '愿你像蛋仔一样\n圆滚滚、可可爱爱\n永远充满活力！' },
+  { emoji: '🌟', text: '8岁啦！\n你是世界上最棒的小朋友\n勇敢又善良！' },
+  { emoji: '🎮', text: '愿你的生活像蛋仔派对一样\n每一局都精彩\n每一关都通关！' },
+  { emoji: '💖', text: '所有的愿望都会实现哦～\n健康快乐地长大\n我们永远爱你！❤️' },
+];
+let giftsOpened = 0;
+const giftsOpenedSet = new Set();
+
+function openGift(index) {
+  if (giftsOpenedSet.has(index)) return;
+  giftsOpenedSet.add(index);
+  giftsOpened++;
+
+  // 视觉反馈
+  const box = document.querySelector(`.gift-box[data-gift="${index}"]`);
+  box.classList.add('opened');
+  box.innerHTML = blessings[index].emoji;
+
+  // 弹窗
+  document.getElementById('blessingEmoji').textContent = blessings[index].emoji;
+  document.getElementById('blessingText').textContent = blessings[index].text;
+  document.getElementById('giftBlessing').classList.add('show');
+  document.getElementById('giftOverlay').classList.add('show');
+  popSound(800);
+
+  if (giftsOpened >= 5) {
+    document.getElementById('giftNextBtn').style.display = 'inline-block';
+    setTimeout(createConfetti, 500);
+  }
+}
+
+function closeGift() {
+  document.getElementById('giftBlessing').classList.remove('show');
+  document.getElementById('giftOverlay').classList.remove('show');
+}
+
+// ============================================
+// 场景4：接蛋糕小游戏
+// ============================================
+let gameRunning = false;
+let gameScore = 0;
+let gameTime = 30;
+let gameTimerId = null;
+let gameEggX = 200;
+let gameEggW = 70;
+let fallingItems = [];
+let gameAnimId = null;
+let gameMoveDir = 0;
+let gameCanvas, gctx;
+let canvasW, canvasH;
+
+function initGame() {
+  gameCanvas = document.getElementById('gameCanvas');
+  gctx = gameCanvas.getContext('2d');
+  resizeGameCanvas();
+  gameRunning = false;
+  gameScore = 0;
+  gameTime = 30;
+  gameEggX = canvasW / 2 - gameEggW / 2;
+  fallingItems = [];
+  document.getElementById('gameScore').textContent = '0';
+  document.getElementById('gameTimer').textContent = '30';
+  document.getElementById('gameStartBtn').style.display = 'inline-block';
+  document.getElementById('gameNextBtn').style.display = 'none';
+  document.getElementById('gameStartBtn').textContent = '▶️';
+  drawGameFrame();
+}
+
+function resizeGameCanvas() {
+  if (!gameCanvas) return;
+  const rect = gameCanvas.getBoundingClientRect();
+  canvasW = rect.width;
+  canvasH = rect.height;
+  gameCanvas.width = canvasW * (window.devicePixelRatio || 1);
+  gameCanvas.height = canvasH * (window.devicePixelRatio || 1);
+  gctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  gameEggW = Math.min(70, canvasW / 5);
+}
+
+window.addEventListener('resize', () => {
+  if (!gameCanvas) return;
+  resizeGameCanvas();
+  if (!gameRunning) drawGameFrame();
+});
+
+function gameMove(dir) {
+  gameMoveDir = dir;
+}
+
+function startGame() {
+  if (gameRunning) return;
+  gameRunning = true;
+  gameScore = 0;
+  gameTime = 30;
+  fallingItems = [];
+  gameEggX = canvasW / 2 - gameEggW / 2;
+  document.getElementById('gameScore').textContent = '0';
+  document.getElementById('gameTimer').textContent = '30';
+  document.getElementById('gameStartBtn').style.display = 'none';
+  document.getElementById('gameNextBtn').style.display = 'none';
+
+  gameTimerId = setInterval(() => {
+    gameTime--;
+    document.getElementById('gameTimer').textContent = gameTime;
+    if (gameTime <= 0) endGame();
+  }, 1000);
+
+  gameLoop();
+}
+
+function gameLoop() {
+  if (!gameRunning) return;
+
+  // 移动蛋仔
+  const speed = canvasW / 80;
+  gameEggX += gameMoveDir * speed;
+  gameEggX = Math.max(0, Math.min(canvasW - gameEggW, gameEggX));
+
+  // 生成掉落物
+  if (Math.random() < 0.025) {
+    const isBomb = Math.random() < 0.15;
+    fallingItems.push({
+      x: Math.random() * (canvasW - 30),
+      y: -30,
+      w: 30,
+      h: 30,
+      speed: Math.random() * 2.5 + 1.5,
+      isBomb,
+      emoji: isBomb ? '💣' : '🍰',
+      points: isBomb ? -10 : (Math.random() < 0.08 ? 30 : 10),
+    });
+  }
+
+  // 更新位置 & 碰撞检测
+  fallingItems = fallingItems.filter(item => {
+    item.y += item.speed;
+    if (item.y > canvasH + 40) return false;
+
+    // 碰撞
+    if (item.y + item.h > canvasH - 70 &&
+        item.y < canvasH - 30 &&
+        item.x + item.w > gameEggX &&
+        item.x < gameEggX + gameEggW) {
+      gameScore = Math.max(0, gameScore + item.points);
+      document.getElementById('gameScore').textContent = gameScore;
+      if (!item.isBomb) popSound(1000);
+      else popSound(300);
+      return false;
+    }
+    return true;
+  });
+
+  drawGameFrame();
+  gameAnimId = requestAnimationFrame(gameLoop);
+}
+
+function drawGameFrame() {
+  gctx.clearRect(0, 0, canvasW, canvasH);
+
+  // 掉落物
+  fallingItems.forEach(item => {
+    gctx.font = '28px sans-serif';
+    gctx.fillText(item.emoji, item.x, item.y);
+  });
+
+  // 蛋仔
+  const ey = canvasH - 70;
+  const ex = gameEggX;
+  const ew = gameEggW;
+  const eh = ew * 1.25;
+
+  // 身体
+  gctx.beginPath();
+  gctx.ellipse(ex + ew / 2, ey + eh * 0.45, ew / 2, eh / 2, 0, 0, Math.PI * 2);
+  const gradient = gctx.createLinearGradient(ex, ey, ex, ey + eh);
+  gradient.addColorStop(0, '#FFE082');
+  gradient.addColorStop(0.5, '#FFD54F');
+  gradient.addColorStop(1, '#F9A825');
+  gctx.fillStyle = gradient;
+  gctx.fill();
+  gctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  gctx.lineWidth = 1;
+  gctx.stroke();
+
+  // 高光
+  gctx.beginPath();
+  gctx.ellipse(ex + ew / 2, ey + eh * 0.22, ew * 0.22, eh * 0.12, 0, 0, Math.PI * 2);
+  gctx.fillStyle = 'rgba(255,255,255,0.5)';
+  gctx.fill();
+
+  // 眼睛
+  const eyeY = ey + eh * 0.28;
+  gctx.fillStyle = '#3E2723';
+  gctx.beginPath(); gctx.arc(ex + ew * 0.32, eyeY, ew * 0.1, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.68, eyeY, ew * 0.1, 0, Math.PI * 2); gctx.fill();
+  // 高光
+  gctx.fillStyle = 'white';
+  gctx.beginPath(); gctx.arc(ex + ew * 0.35, eyeY - ew * 0.03, ew * 0.035, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.71, eyeY - ew * 0.03, ew * 0.035, 0, Math.PI * 2); gctx.fill();
+
+  // 腮红
+  gctx.fillStyle = 'rgba(255,154,162,0.5)';
+  gctx.beginPath(); gctx.ellipse(ex + ew * 0.15, ey + eh * 0.42, ew * 0.09, eh * 0.06, 0, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.ellipse(ex + ew * 0.85, ey + eh * 0.42, ew * 0.09, eh * 0.06, 0, 0, Math.PI * 2); gctx.fill();
+
+  // 嘴巴
+  gctx.strokeStyle = '#BF7B5A';
+  gctx.lineWidth = 1.5;
+  gctx.beginPath();
+  gctx.arc(ex + ew / 2, ey + eh * 0.46, ew * 0.08, 0.1 * Math.PI, 0.9 * Math.PI);
+  gctx.stroke();
+
+  // 小脚
+  gctx.fillStyle = '#F9A825';
+  gctx.beginPath(); gctx.ellipse(ex + ew * 0.28, ey + eh * 0.95, ew * 0.11, eh * 0.07, 0, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.ellipse(ex + ew * 0.72, ey + eh * 0.95, ew * 0.11, eh * 0.07, 0, 0, Math.PI * 2); gctx.fill();
+
+  // 地面线
+  gctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  gctx.lineWidth = 2;
+  gctx.beginPath();
+  gctx.moveTo(0, canvasH - 20);
+  gctx.lineTo(canvasW, canvasH - 20);
+  gctx.stroke();
+}
+
+function endGame() {
+  gameRunning = false;
+  clearInterval(gameTimerId);
+  if (gameAnimId) cancelAnimationFrame(gameAnimId);
+  drawGameFrame();
+
+  document.getElementById('gameStartBtn').style.display = 'inline-block';
+  document.getElementById('gameStartBtn').textContent = '🔄';
+  document.getElementById('gameNextBtn').style.display = 'inline-block';
+  document.getElementById('gameTimer').textContent = '0';
+  createConfetti();
+  celebrateSound();
+}
+
+// 键盘控制
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'a') gameMoveDir = -1;
+  if (e.key === 'ArrowRight' || e.key === 'd') gameMoveDir = 1;
+});
+document.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'ArrowRight' || e.key === 'd') gameMoveDir = 0;
+});
+
+// 触摸拖动
+document.addEventListener('DOMContentLoaded', () => {
+  const gc = document.getElementById('gameCanvas');
+  if (gc) {
+    gc.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!gameRunning) return;
+      const touch = e.touches[0];
+      const rect = gc.getBoundingClientRect();
+      const tx = touch.clientX - rect.left;
+      gameEggX = tx - gameEggW / 2;
+      gameEggX = Math.max(0, Math.min(canvasW - gameEggW, gameEggX));
+    }, { passive: false });
+  }
+});
+
+// ============================================
+// 场景5：祝福墙
+// ============================================
+const blessingMessages = [
+  '🎂 何林溪，生日快乐！',
+  '🥚 像蛋仔一样元气满满！',
+  '🌟 8岁啦！越来越棒！',
+  '💪 健康成长，天天向上！',
+  '🍰 蛋糕吃多多，快乐加加倍！',
+  '🎮 蛋仔派对把把都通关！',
+  '🎁 所有愿望都会实现！',
+  '⭐ 你是最闪亮的小星星！',
+  '🎉 新的一岁，新的冒险！',
+  '💖 保持好奇心，永远快乐！',
+  '🏆 学习进步，快乐成长！',
+  '🦸 做自己的超级英雄！',
+  '🍭 生活比糖果还要甜！',
+  '🚀 梦想起飞，飞得高高！',
+  '🎨 画出属于自己的精彩世界！',
+];
+
+function startBlessingWall() {
+  const wall = document.getElementById('blessingWall');
+  wall.innerHTML = '';
+
+  blessingMessages.forEach((msg, i) => {
+    setTimeout(() => {
+      const bubble = document.createElement('div');
+      bubble.className = 'blessing-bubble';
+      bubble.textContent = msg;
+      const colors = ['#FF6B9D','#64B5F6','#81C784','#FFB74D','#CE93D8','#FF8A65','#4DD0E1','#FFD54F'];
+      bubble.style.background = colors[i % colors.length];
+      bubble.style.left = (Math.random() * 60 + 5) + '%';
+      bubble.style.animationDuration = (Math.random() * 5 + 6) + 's';
+      bubble.style.fontSize = (Math.random() * 4 + 14) + 'px';
+      wall.appendChild(bubble);
+
+      // 自动移除
+      setTimeout(() => {
+        if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
+      }, 12000);
+    }, i * 600);
+  });
+
+  // 持续生成
+  let bubbleIndex = blessingMessages.length;
+  blessingWallInterval = setInterval(() => {
+    if (currentScene !== 5) return;
+    const msg = blessingMessages[Math.floor(Math.random() * blessingMessages.length)];
+    const bubble = document.createElement('div');
+    bubble.className = 'blessing-bubble';
+    bubble.textContent = msg;
+    const colors = ['#FF6B9D','#64B5F6','#81C784','#FFB74D','#CE93D8','#FF8A65','#4DD0E1','#FFD54F'];
+    bubble.style.background = colors[Math.floor(Math.random() * colors.length)];
+    bubble.style.left = (Math.random() * 60 + 5) + '%';
+    bubble.style.animationDuration = (Math.random() * 5 + 6) + 's';
+    wall.appendChild(bubble);
+    setTimeout(() => {
+      if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
+    }, 12000);
+  }, 2500);
+}
+
+// ============================================
+// 彩带庆祝
+// ============================================
+function createConfetti() {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#FFD54F','#FF6B9D','#64B5F6','#81C784','#CE93D8','#FFB74D','#FF5252','#FFD740'];
+
+  for (let i = 0; i < 60; i++) {
+    const confetti = document.createElement('div');
+    confetti.style.cssText = `
+      position: absolute;
+      left: ${Math.random() * 100}%;
+      top: -20px;
+      width: ${Math.random() * 10 + 5}px;
+      height: ${Math.random() * 8 + 5}px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+      animation: confettiFall ${Math.random() * 2 + 1.5}s linear forwards;
+      animation-delay: ${Math.random() * 0.8}s;
+    `;
+    container.appendChild(confetti);
+
+    setTimeout(() => {
+      if (confetti.parentNode) confetti.parentNode.removeChild(confetti);
+    }, 3500);
+  }
+}
+
+// 动态注入彩带动画
+const confettiStyle = document.createElement('style');
+confettiStyle.textContent = `
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(${360 + Math.random() * 720}deg); opacity: 0; }
+  }
+`;
+document.head.appendChild(confettiStyle);
+
+// ============================================
+// 音频系统（Web Audio API 简易音效）
+// ============================================
+let audioCtx = null;
+let musicPlaying = false;
+let musicOscillators = [];
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// 音效：弹出声
+function popSound(freq = 600) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.15);
+  } catch (e) {}
+}
+
+// 音效：庆祝
+function celebrateSound() {
+  try {
+    const ctx = getAudioCtx();
+    const notes = [523, 659, 784, 1047]; // C E G C
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
+      gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + i * 0.12 + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.25);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.25);
+    });
+  } catch (e) {}
+}
+
+// 简易生日快乐歌 BGM
+function playBirthdayMusic() {
+  if (musicPlaying) return;
+  musicPlaying = true;
+  try {
+    const ctx = getAudioCtx();
+    // 生日快乐歌旋律 (简化版)
+    const melody = [
+      { freq: 392, dur: 0.35 }, { freq: 392, dur: 0.35 }, { freq: 440, dur: 0.5 },
+      { freq: 392, dur: 0.5 }, { freq: 523, dur: 0.5 }, { freq: 494, dur: 0.8 },
+      null, null,
+      { freq: 392, dur: 0.35 }, { freq: 392, dur: 0.35 }, { freq: 440, dur: 0.5 },
+      { freq: 392, dur: 0.5 }, { freq: 587, dur: 0.5 }, { freq: 523, dur: 0.8 },
+      null, null,
+      { freq: 392, dur: 0.35 }, { freq: 392, dur: 0.35 }, { freq: 784, dur: 0.5 },
+      { freq: 659, dur: 0.5 }, { freq: 523, dur: 0.5 }, { freq: 494, dur: 0.5 },
+      { freq: 440, dur: 0.8 }, null, null,
+      { freq: 698, dur: 0.35 }, { freq: 698, dur: 0.35 }, { freq: 659, dur: 0.5 },
+      { freq: 523, dur: 0.5 }, { freq: 587, dur: 0.5 }, { freq: 523, dur: 0.8 },
+    ];
+
+    let time = ctx.currentTime;
+    function playLoop() {
+      if (!musicPlaying) return;
+      time = ctx.currentTime;
+      melody.forEach(note => {
+        if (!note) { time += 0.35; return; }
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(note.freq, time);
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.08, time + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + note.dur);
+        osc.start(time);
+        osc.stop(time + note.dur + 0.05);
+        time += note.dur + 0.02;
+      });
+      musicOscillators.push(setTimeout(playLoop, (time - ctx.currentTime) * 1000));
+    }
+    playLoop();
+    document.getElementById('musicToggle').textContent = '🎵';
+  } catch (e) {
+    musicPlaying = false;
+  }
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  musicOscillators.forEach(t => clearTimeout(t));
+  musicOscillators = [];
+  document.getElementById('musicToggle').textContent = '🔇';
+}
+
+// BGM 按钮事件
+document.getElementById('musicToggle').addEventListener('click', () => {
+  if (musicPlaying) {
+    stopMusic();
+  } else {
+    playBirthdayMusic();
+  }
+});
+
+// ============================================
+// 最终庆祝
+// ============================================
+function celebrateEnding() {
+  createConfetti();
+  celebrateSound();
+  // 大量彩带
+  setTimeout(createConfetti, 500);
+  setTimeout(createConfetti, 1000);
+
+  // 弹窗
+  const existing = document.querySelector('.gift-blessing.final');
+  if (existing) existing.remove();
+
+  const blessing = document.getElementById('giftBlessing');
+  blessing.classList.add('final');
+  document.getElementById('blessingEmoji').textContent = '🎂🥚🎉';
+  document.getElementById('blessingText').textContent = '何林溪，8岁生日快乐！\n\n愿蛋仔的快乐永远陪伴你\n健康、勇敢、闪闪发光！✨';
+  blessing.classList.add('show');
+  document.getElementById('giftOverlay').classList.add('show');
+}
+
+// ============================================
+// 初始化
+// ============================================
+function init() {
+  // 首个场景已激活
+  resizeParticleCanvas();
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
