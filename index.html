@@ -569,12 +569,14 @@ html, body {
 }
 .blessing-bubble {
   position: absolute;
-  padding: 12px 22px;
+  padding: 12px 20px;
   border-radius: 24px;
   font-size: 15px;
   font-weight: 600;
   color: white;
-  white-space: nowrap;
+  max-width: 88vw;
+  white-space: normal;
+  word-break: break-word;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   animation: floatUpBubble linear forwards;
   pointer-events: none;
@@ -1401,16 +1403,16 @@ function startBlessingWall() {
     bubble.className = 'blessing-bubble';
     bubble.textContent = msg;
     bubble.style.background = colors[(idx || Math.floor(Math.random() * colors.length)) % colors.length];
-    // 水平位置：均匀分布在整个宽度
-    bubble.style.left = (Math.random() * 75 + 2) + '%';
-    // 垂直起始位置：从顶部到底部均匀分布
-    const startPercent = Math.random() * 85 + 10; // 10% ~ 95%
+    // 水平位置：居中分布，远离右边缘（手机安全）
+    bubble.style.left = (Math.random() * 55 + 5) + '%'; // 5% ~ 60%
+    bubble.style.transform = 'translateX(-50%)'; // 以气泡中心定位，两端都不会溢出
+    // 垂直起始位置均匀分布
+    const startPercent = Math.random() * 85 + 10;
     bubble.style.setProperty('--bubble-start', startPercent + '%');
-    bubble.style.animationDuration = (Math.random() * 4 + 7) + 's';
-    bubble.style.fontSize = (Math.random() * 5 + 14) + 'px';
+    bubble.style.animationDuration = (Math.random() * 5 + 8) + 's';
+    bubble.style.fontSize = (Math.random() * 4 + 14) + 'px';
     wall.appendChild(bubble);
 
-    // 动画结束后自动移除
     const dur = parseFloat(bubble.style.animationDuration) * 1000;
     setTimeout(() => {
       if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
