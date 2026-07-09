@@ -532,17 +532,26 @@ html, body {
 }
 .game-controls {
   margin-top: 12px;
-  display: flex; gap: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  width: 100%; max-width: 360px;
+  gap: 8px;
 }
 .game-btn {
-  width: 60px; height: 60px;
+  width: 62px; height: 62px;
   border-radius: 50%;
   border: none;
-  font-size: 28px;
+  font-size: 30px;
   background: white;
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   cursor: pointer;
   transition: transform 0.1s ease;
+  flex-shrink: 0;
+}
+.game-btn.play-btn {
+  width: 52px; height: 52px;
+  font-size: 22px;
+  background: linear-gradient(135deg, var(--sky-blue), #42A5F5);
+  color: white;
 }
 .game-btn:active { transform: scale(0.9); }
 
@@ -805,7 +814,7 @@ html, body {
   <canvas id="gameCanvas"></canvas>
   <div class="game-controls">
     <button class="game-btn" id="btnLeft" ontouchstart="gameMove(-1)" onmousedown="gameMove(-1)" ontouchend="gameMove(0)" onmouseup="gameMove(0)">⬅️</button>
-    <button class="game-btn" onclick="startGame()" id="gameStartBtn">▶️</button>
+    <button class="game-btn play-btn" onclick="startGame()" id="gameStartBtn">▶️</button>
     <button class="game-btn" id="btnRight" ontouchstart="gameMove(1)" onmousedown="gameMove(1)" ontouchend="gameMove(0)" onmouseup="gameMove(0)">➡️</button>
   </div>
   <p style="margin-top:8px;font-size:12px;color:#999;">💡 也可以用键盘 ← → 控制</p>
@@ -1558,7 +1567,8 @@ function playBirthdayMusic() {
   }
 }
 
-// 蛋仔派对局内风格 BGM（场景4 游戏使用）— 轻快活泼
+// 蛋仔派对局内风格 BGM（场景4 游戏使用）
+// 风格：日系清新电子/chiptune，快节奏 ~150BPM，多层音轨
 function playGameMusic() {
   if (musicPlaying && musicType === 'game') return;
   clearMusicTimers();
@@ -1566,69 +1576,183 @@ function playGameMusic() {
   musicType = 'game';
   try {
     const ctx = getAudioCtx();
-    // 活泼跳跃的蛋仔派对风格旋律，较快 tempo
-    const melody = [
-      // 主旋律 — 欢快跳跃
-      { freq: 523, dur: 0.18 }, { freq: 587, dur: 0.18 }, { freq: 659, dur: 0.18 },
-      { freq: 784, dur: 0.28 }, null, { freq: 659, dur: 0.18 },
-      { freq: 784, dur: 0.28 }, null, { freq: 880, dur: 0.18 },
-      { freq: 784, dur: 0.18 }, { freq: 659, dur: 0.18 }, { freq: 587, dur: 0.28 },
-      null, { freq: 523, dur: 0.18 }, { freq: 659, dur: 0.18 },
-      // 第二段
-      { freq: 784, dur: 0.28 }, null, { freq: 659, dur: 0.18 },
-      { freq: 784, dur: 0.18 }, { freq: 880, dur: 0.18 }, { freq: 988, dur: 0.28 },
-      null, { freq: 880, dur: 0.18 }, { freq: 784, dur: 0.18 },
-      { freq: 659, dur: 0.28 }, { freq: 587, dur: 0.18 }, { freq: 523, dur: 0.28 },
-      // 跳跃段
-      null, { freq: 523, dur: 0.14 }, { freq: 494, dur: 0.14 },
-      { freq: 523, dur: 0.14 }, { freq: 440, dur: 0.14 }, { freq: 523, dur: 0.14 },
-      { freq: 587, dur: 0.14 }, { freq: 659, dur: 0.14 }, { freq: 784, dur: 0.14 },
-      { freq: 880, dur: 0.22 }, null, { freq: 784, dur: 0.14 },
-      { freq: 659, dur: 0.22 }, null, { freq: 523, dur: 0.14 },
-      { freq: 587, dur: 0.22 }, null, { freq: 659, dur: 0.22 },
-      // 结尾
-      null, null, null,
-      { freq: 659, dur: 0.18 }, { freq: 784, dur: 0.18 },
-      { freq: 988, dur: 0.28 }, null, { freq: 880, dur: 0.18 },
-      { freq: 784, dur: 0.28 }, { freq: 659, dur: 0.28 },
-      null, null, null, null, null,
+    const bpm = 148;
+    const beat = 60 / bpm;       // 一拍 ≈ 0.405s
+    const eighth = beat / 2;     // 八分音符
+    const sixteenth = beat / 4;  // 十六分音符
+
+    // 主旋律（高音 lead，square 波 chiptune 风味）
+    const leadMelody = [
+      // 4-bar intro phrase — 跳跃上行
+      { f: 523, d: eighth }, { f: 659, d: eighth },
+      { f: 784, d: beat }, null,
+      { f: 659, d: eighth }, { f: 784, d: eighth },
+      { f: 988, d: beat }, null,
+      // bar 3-4
+      { f: 784, d: eighth }, { f: 659, d: eighth },
+      { f: 587, d: eighth }, { f: 523, d: eighth },
+      { f: 659, d: beat }, { f: 587, d: eighth }, { f: 523, d: eighth },
+      { f: 494, d: beat }, null,
+      // bar 5-8 — 变奏
+      { f: 523, d: eighth }, { f: 440, d: eighth },
+      { f: 523, d: eighth }, { f: 659, d: eighth },
+      { f: 784, d: beat }, { f: 880, d: eighth }, { f: 784, d: eighth },
+      { f: 659, d: beat }, null,
+      { f: 587, d: eighth }, { f: 659, d: eighth },
+      { f: 784, d: eighth }, { f: 659, d: eighth },
+      { f: 587, d: eighth }, { f: 523, d: eighth },
+      { f: 440, d: beat }, { f: 494, d: eighth }, { f: 523, d: eighth },
+      // bar 9-12 — 高潮
+      { f: 659, d: beat }, { f: 784, d: eighth }, { f: 880, d: eighth },
+      { f: 988, d: beat }, { f: 1047, d: eighth }, { f: 988, d: eighth },
+      { f: 880, d: beat }, null,
+      { f: 784, d: eighth }, { f: 659, d: eighth },
+      { f: 784, d: eighth }, { f: 880, d: eighth },
+      { f: 988, d: beat }, { f: 880, d: eighth }, { f: 784, d: eighth },
+      { f: 659, d: beat }, null,
+      // bar 13-16 — 回落+结尾
+      { f: 587, d: eighth }, { f: 523, d: eighth },
+      { f: 440, d: eighth }, { f: 523, d: eighth },
+      { f: 659, d: beat }, { f: 523, d: eighth }, { f: 494, d: eighth },
+      { f: 440, d: beat }, null,
+      { f: 659, d: eighth }, { f: 784, d: eighth },
+      { f: 880, d: beat }, { f: 784, d: eighth }, { f: 659, d: eighth },
+      { f: 523, d: beat }, null,
+      null, null, null, null, // 1 beat rest
     ];
 
-    let time = ctx.currentTime;
-    function playLoop() {
-      if (!musicPlaying || musicType !== 'game') return;
-      time = ctx.currentTime;
-      melody.forEach(note => {
-        if (!note) { time += 0.16; return; }
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'square';
-        // 加入一点和声让音色更饱满
-        const osc2 = ctx.createOscillator();
-        const gain2 = ctx.createGain();
-        osc2.connect(gain2);
-        gain2.connect(ctx.destination);
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(note.freq * 0.5, time);
-        gain2.gain.setValueAtTime(0, time);
-        gain2.gain.linearRampToValueAtTime(0.03, time + 0.02);
-        gain2.gain.exponentialRampToValueAtTime(0.001, time + note.dur);
-        osc2.start(time);
-        osc2.stop(time + note.dur + 0.03);
+    // 低音贝斯线（sawtooth，有节奏感）
+    const bassLine = [
+      { f: 131, d: beat }, { f: 131, d: beat }, { f: 165, d: beat }, { f: 165, d: beat },
+      { f: 147, d: beat }, { f: 147, d: beat }, { f: 123, d: beat }, { f: 123, d: beat },
+      { f: 131, d: beat }, { f: 98, d: beat }, { f: 165, d: beat }, { f: 147, d: beat },
+      { f: 131, d: beat }, { f: 123, d: beat }, { f: 110, d: beat }, { f: 98, d: beat },
+      // repeat
+      { f: 131, d: beat }, { f: 131, d: beat }, { f: 165, d: beat }, { f: 165, d: beat },
+      { f: 147, d: beat }, { f: 147, d: beat }, { f: 123, d: beat }, { f: 123, d: beat },
+      { f: 131, d: beat }, { f: 98, d: beat }, { f: 165, d: beat }, { f: 147, d: beat },
+      { f: 131, d: beat*2 }, null, null,
+      null, null, null, null,
+    ];
 
-        osc.frequency.setValueAtTime(note.freq, time);
-        gain.gain.setValueAtTime(0, time);
-        gain.gain.linearRampToValueAtTime(0.06, time + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + note.dur);
-        osc.start(time);
-        osc.stop(time + note.dur + 0.03);
-        time += note.dur + 0.02;
-      });
-      musicOscillators.push(setTimeout(playLoop, (time - ctx.currentTime) * 1000));
+    let seqTime = 0;
+
+    // 辅助：播放一个音符
+    function playNote(freq, startTime, duration, type, vol, extra) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, startTime);
+      if (extra === 'slide') {
+        osc.frequency.linearRampToValueAtTime(freq * 1.15, startTime + duration * 0.6);
+        osc.frequency.linearRampToValueAtTime(freq * 0.9, startTime + duration);
+      }
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(vol, startTime + 0.008);
+      gain.gain.setValueAtTime(vol, startTime + duration * 0.7);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + duration + 0.02);
     }
-    playLoop();
+
+    // 辅助：打击乐（噪音模拟 hi-hat / snare）
+    function playDrum(startTime, type) {
+      const bufSize = ctx.sampleRate * (type === 'snare' ? 0.06 : 0.03);
+      const buffer = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) {
+        if (type === 'hat') {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.008));
+        } else {
+          // snare: noise + tone
+          const noise = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.03));
+          const tone = Math.sin(i * 0.28) * Math.exp(-i / (ctx.sampleRate * 0.015)) * 0.4;
+          data[i] = noise * 0.9 + tone;
+        }
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(type === 'snare' ? 0.6 : 0.35, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + (type === 'snare' ? 0.06 : 0.03));
+      src.connect(gain);
+      gain.connect(ctx.destination);
+      src.start(startTime);
+    }
+
+    // 主循环：播放所有音轨
+    let totalBeats = 0;
+    function playAllTracks() {
+      if (!musicPlaying || musicType !== 'game') return;
+
+      const now = ctx.currentTime;
+
+      // Lead
+      seqTime = now;
+      leadMelody.forEach(n => {
+        if (n) {
+          playNote(n.f, seqTime, n.d * 0.9, 'square', 0.05, undefined);
+          // harmony 5th above (chiptune staple)
+          playNote(n.f * 1.5, seqTime, n.d * 0.85, 'triangle', 0.018, undefined);
+        }
+        seqTime += n ? n.d : eighth;
+      });
+
+      // Bass
+      seqTime = now;
+      bassLine.forEach(n => {
+        if (n) {
+          playNote(n.f, seqTime, n.d * 0.85, 'sawtooth', 0.06, undefined);
+        }
+        seqTime += n ? n.d : beat;
+      });
+
+      // 和弦点缀（每两拍一个短促和弦，增加厚度）
+      const chordPattern = [
+        { notes: [523, 659, 784], pos: 0 },
+        { notes: [523, 659, 784], pos: beat * 2 },
+        { notes: [587, 740, 880], pos: beat * 4 },
+        { notes: [587, 740, 880], pos: beat * 6 },
+        { notes: [494, 587, 740], pos: beat * 8 },
+        { notes: [494, 587, 740], pos: beat * 10 },
+        { notes: [440, 554, 659], pos: beat * 12 },
+        { notes: [440, 554, 659], pos: beat * 14 },
+        { notes: [523, 659, 784], pos: beat * 16 },
+        { notes: [392, 494, 587], pos: beat * 18 },
+        { notes: [440, 554, 659], pos: beat * 20 },
+        { notes: [494, 587, 740], pos: beat * 22 },
+        { notes: [523, 659, 784], pos: beat * 24 },
+        { notes: [440, 554, 659], pos: beat * 26 },
+        { notes: [392, 494, 587], pos: beat * 28 },
+        { notes: [330, 415, 523], pos: beat * 30 },
+      ];
+      chordPattern.forEach(c => {
+        c.notes.forEach(nf => {
+          playNote(nf, now + c.pos, beat * 1.6, 'triangle', 0.03, undefined);
+        });
+      });
+
+      // 打击乐轨（hi-hat on eighth, snare on beat 2+4）
+      const totalDur = totalBeats === 0 ? 32 * beat : totalBeats;
+      for (let t = 0; t < totalDur; t += eighth) {
+        const beatInBar = (t / beat) % 4;
+        // hi-hat every eighth (quick chiptune arp feel)
+        playDrum(now + t, 'hat');
+        // snare on beats 2 and 4 (backbeat)
+        if (Math.abs(beatInBar - 1) < 0.01 || Math.abs(beatInBar - 3) < 0.01) {
+          playDrum(now + t, 'snare');
+        }
+      }
+
+      // 每 16 秒重新调度
+      const loopLen = 32 * beat; // 32 beats ≈ 13s
+      totalBeats = loopLen;
+      musicOscillators.push(setTimeout(playAllTracks, (loopLen - 0.2) * 1000));
+    }
+
+    playAllTracks();
   } catch (e) {
     musicPlaying = false;
   }
