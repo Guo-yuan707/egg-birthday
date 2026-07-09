@@ -65,98 +65,157 @@ html, body {
 }
 
 /* ============================================
-   CSS 蛋仔角色 — 蛋小黄风格
+   CSS 蛋仔角色 — 蛋小黄（蛋仔派对官方形象）
+   特征：圆蛋形身体 + 头顶小揪揪 + 大白圆眼 + 腮红 + 小短手
    ============================================ */
 .egg-character {
   position: relative;
-  width: 80px; height: 82px;
-  background: linear-gradient(180deg, #FFD54F 0%, #FFB300 25%, #FF8F00 60%, #E65100 100%);
+  width: 80px; height: 78px;
+  background: linear-gradient(180deg, #FFE57F 0%, #FFD740 18%, #FFC107 45%, #FFAB00 75%, #FF8F00 100%);
   border-radius: 50%;
   box-shadow:
-    inset -5px -3px 10px rgba(0,0,0,0.12),
-    inset -2px 5px 6px rgba(255,255,255,0.2),
-    0 6px 18px rgba(0,0,0,0.15);
+    inset -4px -2px 8px rgba(0,0,0,0.08),
+    inset -1px 4px 5px rgba(255,255,255,0.25),
+    0 6px 16px rgba(0,0,0,0.12);
 }
-/* 头顶高光 */
+/* 头顶小揪揪（蛋小黄标志） */
 .egg-character::before {
   content: '';
   position: absolute;
-  top: 8%; left: 50%; transform: translateX(-50%);
-  width: 48%; height: 15%;
-  background: rgba(255,255,255,0.45);
-  border-radius: 50%;
+  top: -14px; left: 50%; transform: translateX(-50%);
+  width: 10px; height: 18px;
+  background: linear-gradient(180deg, #F57C00 0%, #E65100 100%);
+  border-radius: 50% 50% 40% 40%;
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.06);
+  animation: tuftWave 1.5s ease-in-out infinite;
 }
-/* 小手 */
-.egg-character::after {
+/* 头顶小揪揪旁边的短须 */
+.egg-tuft {
+  position: absolute;
+  top: -14px; left: 50%;
+  width: 14px; height: 10px;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+.egg-tuft::before,
+.egg-tuft::after {
   content: '';
   position: absolute;
-  bottom: 28%; left: -10px;
-  width: 16px; height: 13px;
-  background: linear-gradient(180deg, #FFB300, #F57C00);
+  top: 0;
+  width: 5px; height: 10px;
+  background: #FFAB00;
   border-radius: 50%;
-  box-shadow:
-    62px 0 0 0 #FFB300,
-    62px 0 0 1px rgba(0,0,0,0.06),
-    inset 0 -2px 3px rgba(0,0,0,0.08);
 }
-/* 眼睛（大白眼球+大黑瞳孔） */
-.egg-eyes { position: absolute; top: 28%; left: 50%; transform: translateX(-50%); width: 54px; display: flex; justify-content: space-between; }
+.egg-tuft::before { left: 2px; transform: rotate(-15deg); }
+.egg-tuft::after { right: 2px; transform: rotate(15deg); }
+
+/* 头顶高光 */
+.egg-shine {
+  position: absolute;
+  top: 4px; left: 50%; transform: translateX(-50%);
+  width: 30px; height: 12px;
+  background: rgba(255,255,255,0.55);
+  border-radius: 50%;
+  pointer-events: none;
+}
+/* 条纹连体衣（下半身） */
+.egg-body-stripes {
+  position: absolute;
+  bottom: 18px; left: 50%; transform: translateX(-50%);
+  width: 70px; height: 30px;
+  border-radius: 0 0 40px 40px;
+  background: repeating-linear-gradient(
+    0deg,
+    #FF8F00 0px, #FF8F00 3px,
+    #FFB300 3px, #FFB300 6px
+  );
+  opacity: 0.35;
+  pointer-events: none;
+}
+/* 小手（两只圆短手，身体两侧） */
+.egg-hands {
+  position: absolute;
+  top: 48px; left: 50%; transform: translateX(-50%);
+  width: 92px; display: flex; justify-content: space-between;
+  pointer-events: none;
+}
+.egg-hand {
+  width: 15px; height: 12px;
+  background: linear-gradient(180deg, #FFC107, #FF9800);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  animation: handWiggle 2s ease-in-out infinite;
+}
+.egg-hand.right { animation-delay: 0.8s; }
+
+/* 眼睛（大白眼球+大黑瞳孔，蛋仔官方风格） */
+.egg-eyes { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 50px; display: flex; justify-content: space-between; }
 .egg-eye {
-  width: 21px; height: 23px;
+  width: 20px; height: 22px;
   background: white; border-radius: 50%;
   position: relative;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.06);
   animation: blink 3s infinite;
+  overflow: hidden;
 }
 .egg-eye::before {
   content: '';
   position: absolute;
-  top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 12px; height: 14px;
+  top: 4px; left: 4px;
+  width: 11px; height: 13px;
   background: #2C1810; border-radius: 50%;
 }
 .egg-eye::after {
   content: '';
   position: absolute;
-  top: 25%; left: 55%;
+  top: 6px; left: 10px;
   width: 5px; height: 5px;
   background: white; border-radius: 50%;
 }
 /* 腮红 */
 .egg-blush {
   position: absolute;
-  top: 42%;
-  width: 14px; height: 9px;
-  background: rgba(255,138,128,0.45);
+  top: 32px;
+  width: 13px; height: 8px;
+  background: rgba(255,130,120,0.4);
   border-radius: 50%;
-  filter: blur(1px);
+  filter: blur(1.5px);
 }
-.egg-blush.left { left: 1px; }
-.egg-blush.right { right: 1px; }
-/* 嘴巴（小小可爱的） */
+.egg-blush.left { left: 2px; }
+.egg-blush.right { right: 2px; }
+/* 嘴巴（小曲线微笑） */
 .egg-mouth {
   position: absolute;
-  top: 48%; left: 50%; transform: translateX(-50%);
-  width: 7px; height: 4px;
-  border-bottom: 2px solid #8D6E63;
+  top: 38px; left: 50%; transform: translateX(-50%);
+  width: 8px; height: 5px;
+  border-bottom: 2px solid #A0724A;
   border-radius: 0 0 50% 50%;
 }
-/* 小脚（圆滚滚） */
+/* 小脚 */
 .egg-feet {
   position: absolute;
-  bottom: -5px; left: 50%; transform: translateX(-50%);
-  width: 36px; display: flex; justify-content: space-between;
+  bottom: -4px; left: 50%; transform: translateX(-50%);
+  width: 34px; display: flex; justify-content: space-between;
 }
 .egg-foot {
-  width: 15px; height: 10px;
+  width: 14px; height: 9px;
   background: #E65100;
   border-radius: 50%;
-  box-shadow: 0 3px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 3px rgba(0,0,0,0.08);
 }
 
 @keyframes blink {
   0%, 90%, 100% { transform: scaleY(1); }
   95% { transform: scaleY(0.08); }
+}
+@keyframes tuftWave {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  25% { transform: translateX(-50%) rotate(-5deg); }
+  75% { transform: translateX(-50%) rotate(5deg); }
+}
+@keyframes handWiggle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
 }
 
 /* ============================================
@@ -261,7 +320,7 @@ html, body {
 #scene1 .egg-character {
   animation: dropIn 1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards,
              wobble 0.5s ease-in-out 1s 3;
-  width: 110px; height: 112px;
+  width: 110px; height: 106px;
 }
 @keyframes dropIn {
   0% { transform: translateY(-120vh); opacity: 0; }
@@ -328,22 +387,12 @@ html, body {
 .cake-egg {
   position: absolute; top: -70px; left: 50%; transform: translateX(-50%);
   width: 56px; height: 58px;
-  background: linear-gradient(180deg, #FFD54F 0%, #FFB300 30%, #FF8F00 65%, #E65100 100%);
+  background: linear-gradient(180deg, #FFE57F 0%, #FFC107 30%, #FFAB00 65%, #FF8F00 100%);
   border-radius: 50%;
   box-shadow:
     inset -3px -2px 6px rgba(0,0,0,0.1),
     inset -1px 3px 4px rgba(255,255,255,0.15),
     0 4px 10px rgba(0,0,0,0.12);
-}
-/* 蛋糕蛋仔——小手 */
-.cake-egg::after {
-  content: '';
-  position: absolute;
-  bottom: 26%; left: -6px;
-  width: 12px; height: 10px;
-  background: linear-gradient(180deg, #FFB300, #F57C00);
-  border-radius: 50%;
-  box-shadow: 44px 0 0 0 #FFB300;
 }
 /* 蜡烛 */
 .candles-area {
@@ -498,30 +547,32 @@ html, body {
 .game-btn:active { transform: scale(0.9); }
 
 /* ============================================
-   场景5：祝福墙
+   场景5：祝福墙 — 全屏分布
    ============================================ */
-#scene5 { background: linear-gradient(180deg, #FFF9E6 0%, #FFE0B2 50%, #FFCC80 100%); }
+#scene5 { background: linear-gradient(180deg, #FFF9E6 0%, #FFE0B2 50%, #FFCC80 100%); padding-top: 4px; }
 .blessing-wall {
-  width: 100%; height: 60%;
+  width: 100%; flex: 1;
   position: relative;
   overflow: hidden;
+  min-height: 75vh;
 }
 .blessing-bubble {
   position: absolute;
-  padding: 12px 20px;
+  padding: 12px 22px;
   border-radius: 24px;
   font-size: 15px;
   font-weight: 600;
   color: white;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  animation: floatUp linear forwards;
+  animation: floatUpBubble linear forwards;
+  pointer-events: none;
 }
-@keyframes floatUp {
-  0% { transform: translateY(110%); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(-110%); opacity: 0; }
+@keyframes floatUpBubble {
+  0% { top: var(--bubble-start); opacity: 0; }
+  5% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: -100px; opacity: 0; }
 }
 
 /* ============================================
@@ -607,7 +658,7 @@ html, body {
    响应式
    ============================================ */
 @media (min-width: 600px) {
-  .egg-character { width: 110px; height: 112px; }
+  .egg-character { width: 110px; height: 106px; }
   .cake { width: 240px; }
   .gifts-grid { max-width: 400px; gap: 24px; }
   .gift-box { width: 150px; height: 150px; font-size: 60px; }
@@ -630,6 +681,8 @@ html, body {
 <div class="scene active" id="scene1">
   <div class="egg-caterpillar-group">
     <div class="egg-character">
+      <div class="egg-tuft"></div>
+      <div class="egg-shine"></div>
       <div class="egg-eyes">
         <div class="egg-eye"></div>
         <div class="egg-eye"></div>
@@ -637,6 +690,11 @@ html, body {
       <div class="egg-blush left"></div>
       <div class="egg-blush right"></div>
       <div class="egg-mouth"></div>
+      <div class="egg-hands">
+        <div class="egg-hand left"></div>
+        <div class="egg-hand right"></div>
+      </div>
+      <div class="egg-body-stripes"></div>
       <div class="egg-feet">
         <div class="egg-foot"></div>
         <div class="egg-foot"></div>
@@ -671,13 +729,20 @@ html, body {
     <div class="cake">
       <!-- 蛋仔 -->
       <div class="cake-egg" id="cakeEgg">
-        <div class="egg-eyes" style="top:15px;width:37px;">
-          <div class="egg-eye" style="width:14px;height:15px;"></div>
-          <div class="egg-eye" style="width:14px;height:15px;"></div>
+        <div class="egg-tuft" style="top:-11px;"></div>
+        <div class="egg-shine" style="top:2px;width:22px;height:8px;"></div>
+        <div class="egg-eyes" style="top:10px;width:34px;">
+          <div class="egg-eye" style="width:13px;height:14px;"></div>
+          <div class="egg-eye" style="width:13px;height:14px;"></div>
         </div>
-        <div class="egg-blush left" style="top:23px;left:0;width:9px;height:6px;"></div>
-        <div class="egg-blush right" style="top:23px;right:0;width:9px;height:6px;"></div>
-        <div class="egg-mouth" style="top:28px;width:6px;height:3px;"></div>
+        <div class="egg-blush left" style="top:21px;left:0;width:8px;height:5px;"></div>
+        <div class="egg-blush right" style="top:21px;right:0;width:8px;height:5px;"></div>
+        <div class="egg-mouth" style="top:25px;width:5px;height:3px;"></div>
+        <div class="egg-hands" style="top:30px;width:64px;">
+          <div class="egg-hand left" style="width:10px;height:8px;"></div>
+          <div class="egg-hand right" style="width:10px;height:8px;"></div>
+        </div>
+        <div class="egg-body-stripes" style="bottom:12px;width:48px;height:22px;border-radius:0 0 30px 30px;"></div>
       </div>
       <!-- 蜡烛 -->
       <div class="candles-area" id="candlesArea"></div>
@@ -1143,74 +1208,96 @@ function drawGameFrame() {
     gctx.fillText(item.emoji, item.x, item.y);
   });
 
-  // 蛋小黄
+  // 蛋小黄（蛋仔派对风格：圆身+小揪揪+圆手+大白眼+腮红）
   const ey = canvasH - 70;
   const ex = gameEggX;
   const ew = gameEggW;
-  const eh = ew * 1.02; // 近乎正圆
-
-  // 身体（正圆形）
+  const eh = ew * 0.98;
   const cx = ex + ew / 2;
   const cy = ey + eh / 2;
+
+  // 身体（正圆）
   gctx.beginPath();
   gctx.arc(cx, cy, ew / 2, 0, Math.PI * 2);
   const gradient = gctx.createLinearGradient(ex, ey, ex, ey + eh);
-  gradient.addColorStop(0, '#FFD54F');
-  gradient.addColorStop(0.25, '#FFB300');
-  gradient.addColorStop(0.65, '#FF8F00');
-  gradient.addColorStop(1, '#E65100');
+  gradient.addColorStop(0, '#FFE57F');
+  gradient.addColorStop(0.18, '#FFD740');
+  gradient.addColorStop(0.5, '#FFC107');
+  gradient.addColorStop(0.8, '#FFAB00');
+  gradient.addColorStop(1, '#FF8F00');
   gctx.fillStyle = gradient;
   gctx.fill();
-  gctx.strokeStyle = 'rgba(0,0,0,0.06)';
-  gctx.lineWidth = 1;
-  gctx.stroke();
-
-  // 头顶高光
-  gctx.beginPath();
-  gctx.ellipse(cx, ey + eh * 0.15, ew * 0.2, eh * 0.08, 0, 0, Math.PI * 2);
-  gctx.fillStyle = 'rgba(255,255,255,0.45)';
-  gctx.fill();
-
-  // 小手
-  gctx.fillStyle = '#FFB300';
-  gctx.beginPath(); gctx.arc(ex - ew * 0.06, ey + eh * 0.6, ew * 0.1, 0, Math.PI * 2); gctx.fill();
-  gctx.beginPath(); gctx.arc(ex + ew * 1.06, ey + eh * 0.6, ew * 0.1, 0, Math.PI * 2); gctx.fill();
-
-  // 眼睛（大白眼球）
-  const eyeY = cy - eh * 0.04;
-  gctx.fillStyle = 'white';
-  gctx.beginPath(); gctx.arc(ex + ew * 0.3, eyeY, ew * 0.15, 0, Math.PI * 2); gctx.fill();
-  gctx.beginPath(); gctx.arc(ex + ew * 0.7, eyeY, ew * 0.15, 0, Math.PI * 2); gctx.fill();
-  // 眼球边框
-  gctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  gctx.strokeStyle = 'rgba(0,0,0,0.05)';
   gctx.lineWidth = 0.5;
   gctx.stroke();
 
+  // 小揪揪（蛋小黄标志！）
+  const tuftX = cx;
+  const tuftY = ey + 2;
+  gctx.fillStyle = '#E65100';
+  gctx.beginPath();
+  gctx.ellipse(tuftX, tuftY - ew * 0.15, ew * 0.06, ew * 0.12, 0, Math.PI, Math.PI * 2);
+  gctx.fill();
+  // 小揪揪根部的橙色过渡
+  gctx.fillStyle = '#F57C00';
+  gctx.beginPath();
+  gctx.ellipse(tuftX, tuftY - ew * 0.07, ew * 0.07, ew * 0.06, 0, Math.PI, Math.PI * 2);
+  gctx.fill();
+
+  // 头顶高光
+  gctx.beginPath();
+  gctx.ellipse(cx, cy - eh * 0.3, ew * 0.18, eh * 0.07, 0, 0, Math.PI * 2);
+  gctx.fillStyle = 'rgba(255,255,255,0.5)';
+  gctx.fill();
+
+  // 小手
+  gctx.fillStyle = '#FFC107';
+  gctx.beginPath(); gctx.arc(ex - ew * 0.05, cy + eh * 0.15, ew * 0.09, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 1.05, cy + eh * 0.15, ew * 0.09, 0, Math.PI * 2); gctx.fill();
+
+  // 眼睛（大白眼球）
+  const eyeY = cy - eh * 0.06;
+  gctx.fillStyle = 'white';
+  gctx.beginPath(); gctx.arc(ex + ew * 0.3, eyeY, ew * 0.14, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.7, eyeY, ew * 0.14, 0, Math.PI * 2); gctx.fill();
+
   // 瞳孔
   gctx.fillStyle = '#2C1810';
-  gctx.beginPath(); gctx.arc(ex + ew * 0.3, eyeY, ew * 0.085, 0, Math.PI * 2); gctx.fill();
-  gctx.beginPath(); gctx.arc(ex + ew * 0.7, eyeY, ew * 0.085, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.3, eyeY + 1, ew * 0.078, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.7, eyeY + 1, ew * 0.078, 0, Math.PI * 2); gctx.fill();
   // 高光
   gctx.fillStyle = 'white';
   gctx.beginPath(); gctx.arc(ex + ew * 0.33, eyeY - ew * 0.03, ew * 0.035, 0, Math.PI * 2); gctx.fill();
   gctx.beginPath(); gctx.arc(ex + ew * 0.73, eyeY - ew * 0.03, ew * 0.035, 0, Math.PI * 2); gctx.fill();
 
   // 腮红
-  gctx.fillStyle = 'rgba(255,138,128,0.35)';
-  gctx.beginPath(); gctx.ellipse(ex + ew * 0.08, ey + eh * 0.46, ew * 0.09, eh * 0.06, 0, 0, Math.PI * 2); gctx.fill();
-  gctx.beginPath(); gctx.ellipse(ex + ew * 0.92, ey + eh * 0.46, ew * 0.09, eh * 0.06, 0, 0, Math.PI * 2); gctx.fill();
+  gctx.fillStyle = 'rgba(255,130,120,0.35)';
+  gctx.beginPath(); gctx.ellipse(ex + ew * 0.06, cy + eh * 0.06, ew * 0.08, eh * 0.05, 0, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.ellipse(ex + ew * 0.94, cy + eh * 0.06, ew * 0.08, eh * 0.05, 0, 0, Math.PI * 2); gctx.fill();
+
+  // 条纹连体衣（下半身）
+  gctx.save();
+  gctx.beginPath();
+  gctx.arc(cx, cy + eh * 0.12, ew / 2 - 1, Math.PI * 0.55, Math.PI * 0.45, true);
+  gctx.clip();
+  const stripeStart = cy + eh * 0.08;
+  for (let s = 0; s < 5; s++) {
+    gctx.fillStyle = s % 2 === 0 ? 'rgba(224,120,0,0.25)' : 'rgba(255,179,0,0.15)';
+    gctx.fillRect(ex - ew/2, stripeStart + s * (ew * 0.07), ex + ew/2 + ew, ew * 0.07);
+  }
+  gctx.restore();
 
   // 嘴巴
-  gctx.strokeStyle = '#8D6E63';
-  gctx.lineWidth = 1.5;
+  gctx.strokeStyle = '#A0724A';
+  gctx.lineWidth = 1.2;
   gctx.beginPath();
-  gctx.arc(cx, cy + eh * 0.06, ew * 0.06, 0.15 * Math.PI, 0.85 * Math.PI);
+  gctx.arc(cx, cy + eh * 0.08, ew * 0.05, 0.2 * Math.PI, 0.8 * Math.PI);
   gctx.stroke();
 
   // 小脚
   gctx.fillStyle = '#E65100';
-  gctx.beginPath(); gctx.arc(ex + ew * 0.28, ey + eh - ew * 0.04, ew * 0.09, 0, Math.PI * 2); gctx.fill();
-  gctx.beginPath(); gctx.arc(ex + ew * 0.72, ey + eh - ew * 0.04, ew * 0.09, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.28, ey + eh - ew * 0.03, ew * 0.08, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.72, ey + eh - ew * 0.03, ew * 0.08, 0, Math.PI * 2); gctx.fill();
 
   // 地面线
   gctx.strokeStyle = 'rgba(0,0,0,0.06)';
@@ -1287,42 +1374,40 @@ function startBlessingWall() {
   const wall = document.getElementById('blessingWall');
   wall.innerHTML = '';
 
-  blessingMessages.forEach((msg, i) => {
-    setTimeout(() => {
-      const bubble = document.createElement('div');
-      bubble.className = 'blessing-bubble';
-      bubble.textContent = msg;
-      const colors = ['#FF6B9D','#64B5F6','#81C784','#FFB74D','#CE93D8','#FF8A65','#4DD0E1','#FFD54F'];
-      bubble.style.background = colors[i % colors.length];
-      bubble.style.left = (Math.random() * 60 + 5) + '%';
-      bubble.style.animationDuration = (Math.random() * 5 + 6) + 's';
-      bubble.style.fontSize = (Math.random() * 4 + 14) + 'px';
-      wall.appendChild(bubble);
+  const colors = ['#FF6B9D','#64B5F6','#81C784','#FFB74D','#CE93D8','#FF8A65','#4DD0E1','#FFD54F'];
 
-      // 自动移除
-      setTimeout(() => {
-        if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
-      }, 12000);
-    }, i * 600);
-  });
-
-  // 持续生成
-  let bubbleIndex = blessingMessages.length;
-  blessingWallInterval = setInterval(() => {
-    if (currentScene !== 5) return;
-    const msg = blessingMessages[Math.floor(Math.random() * blessingMessages.length)];
+  function createBubble(msg, idx) {
     const bubble = document.createElement('div');
     bubble.className = 'blessing-bubble';
     bubble.textContent = msg;
-    const colors = ['#FF6B9D','#64B5F6','#81C784','#FFB74D','#CE93D8','#FF8A65','#4DD0E1','#FFD54F'];
-    bubble.style.background = colors[Math.floor(Math.random() * colors.length)];
-    bubble.style.left = (Math.random() * 60 + 5) + '%';
-    bubble.style.animationDuration = (Math.random() * 5 + 6) + 's';
+    bubble.style.background = colors[(idx || Math.floor(Math.random() * colors.length)) % colors.length];
+    // 水平位置：均匀分布在整个宽度
+    bubble.style.left = (Math.random() * 75 + 2) + '%';
+    // 垂直起始位置：从顶部到底部均匀分布
+    const startPercent = Math.random() * 85 + 10; // 10% ~ 95%
+    bubble.style.setProperty('--bubble-start', startPercent + '%');
+    bubble.style.animationDuration = (Math.random() * 4 + 7) + 's';
+    bubble.style.fontSize = (Math.random() * 5 + 14) + 'px';
     wall.appendChild(bubble);
+
+    // 动画结束后自动移除
+    const dur = parseFloat(bubble.style.animationDuration) * 1000;
     setTimeout(() => {
       if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
-    }, 12000);
-  }, 2500);
+    }, dur + 200);
+  }
+
+  // 初始一批气泡，从不同位置开始飘
+  blessingMessages.forEach((msg, i) => {
+    setTimeout(() => createBubble(msg, i), i * 400);
+  });
+
+  // 持续生成新气泡
+  blessingWallInterval = setInterval(() => {
+    if (currentScene !== 5) return;
+    const msg = blessingMessages[Math.floor(Math.random() * blessingMessages.length)];
+    createBubble(msg, Math.floor(Math.random() * 100));
+  }, 2000);
 }
 
 // ============================================
