@@ -1464,13 +1464,35 @@ let audioCtx = null;
 let musicPlaying = false;
 let musicType = 'birthday'; // 'birthday' | 'game'
 let musicOscillators = [];
-let musicGainNode = null;
+let masterGainNode = null;   // 主音量控制节点
 
 function getAudioCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // 创建主增益节点，所有音乐通过它输出，统一控制音量
+    masterGainNode = audioCtx.createGain();
+    masterGainNode.connect(audioCtx.destination);
+  }
   // Resume if suspended (browser autoplay policy)
   if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
+}
+
+// 辅助：播放一个音符（通过 masterGain 输出，可统一调音量）
+function playMusicNote(freq, startTime, duration, type, vol) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(vol, startTime + 0.015);
+  gain.gain.setValueAtTime(vol, startTime + duration * 0.7);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+  osc.connect(gain);
+  gain.connect(masterGainNode || ctx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.05);
 }
 
 // 音效：弹出声
@@ -1480,7 +1502,7 @@ function popSound(freq = 600) {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(masterGainNode || ctx.destination);
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
@@ -1500,7 +1522,7 @@ function celebrateSound() {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(masterGainNode || ctx.destination);
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
       gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
@@ -1518,7 +1540,7 @@ function clearMusicTimers() {
   musicOscillators = [];
 }
 
-// 生日快乐歌 BGM（场景1-3、5 使用）— 温暖饱满
+// 生日快乐歌 BGM（场景1-3、5 使用）— masterGain 推高
 function playBirthdayMusic() {
   if (musicPlaying && musicType === 'birthday') return;
   clearMusicTimers();
@@ -1526,6 +1548,13 @@ function playBirthdayMusic() {
   musicType = 'birthday';
   try {
     const ctx = getAudioCtx();
+    // 生日歌用较高 masterGain
+    if (masterGainNode) {
+      masterGainNode.gain.cancelScheduledValues(ctx.currentTime);
+      masterGainNode.gain.setValueAtTime(masterGainNode.gain.value, ctx.currentTime);
+      masterGainNode.gain.linearRampToValueAtTime(1.3, ctx.currentTime + 0.1);
+    }
+
     const melody = [
       { freq: 392, dur: 0.35 }, { freq: 392, dur: 0.35 }, { freq: 440, dur: 0.5 },
       { freq: 392, dur: 0.5 }, { freq: 523, dur: 0.5 }, { freq: 494, dur: 0.8 },
@@ -1540,33 +1569,15 @@ function playBirthdayMusic() {
       { freq: 523, dur: 0.5 }, { freq: 587, dur: 0.5 }, { freq: 523, dur: 0.8 },
     ];
 
-    function playNote(freq, startTime, duration, type, vol) {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, startTime);
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(vol, startTime + 0.02);
-      gain.gain.setValueAtTime(vol, startTime + duration * 0.75);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(startTime);
-      osc.stop(startTime + duration + 0.05);
-    }
-
     let time = ctx.currentTime;
     function playLoop() {
       if (!musicPlaying || musicType !== 'birthday') return;
       time = ctx.currentTime;
       melody.forEach(note => {
         if (!note) { time += 0.35; return; }
-        // 主旋律 triangle — 饱满音量
-        playNote(note.freq, time, note.dur, 'triangle', 0.16);
-        // 低八度 sine 做基底，增加温暖感
-        playNote(note.freq * 0.5, time, note.dur, 'sine', 0.07);
-        // 高八度 triangle 增加亮色
-        playNote(note.freq * 2, time, note.dur, 'triangle', 0.04);
+        playMusicNote(note.freq, time, note.dur, 'triangle', 0.16);
+        playMusicNote(note.freq * 0.5, time, note.dur, 'sine', 0.07);
+        playMusicNote(note.freq * 2, time, note.dur, 'triangle', 0.04);
         time += note.dur + 0.02;
       });
       musicOscillators.push(setTimeout(playLoop, (time - ctx.currentTime) * 1000));
@@ -1586,6 +1597,13 @@ function playGameMusic() {
   musicType = 'game';
   try {
     const ctx = getAudioCtx();
+    // 游戏 BGM 多层音轨，降低 masterGain 防止手机扬声器过噪
+    if (masterGainNode) {
+      masterGainNode.gain.cancelScheduledValues(ctx.currentTime);
+      masterGainNode.gain.setValueAtTime(masterGainNode.gain.value, ctx.currentTime);
+      masterGainNode.gain.linearRampToValueAtTime(0.75, ctx.currentTime + 0.1);
+    }
+
     const bpm = 148;
     const beat = 60 / bpm;       // 一拍 ≈ 0.405s
     const eighth = beat / 2;     // 八分音符
@@ -1647,48 +1665,28 @@ function playGameMusic() {
 
     let seqTime = 0;
 
-    // 辅助：播放一个音符
-    function playNote(freq, startTime, duration, type, vol, extra) {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, startTime);
-      if (extra === 'slide') {
-        osc.frequency.linearRampToValueAtTime(freq * 1.15, startTime + duration * 0.6);
-        osc.frequency.linearRampToValueAtTime(freq * 0.9, startTime + duration);
-      }
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(vol, startTime + 0.008);
-      gain.gain.setValueAtTime(vol, startTime + duration * 0.7);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(startTime);
-      osc.stop(startTime + duration + 0.02);
-    }
-
-    // 辅助：打击乐（噪音模拟 hi-hat / snare）
+    // 辅助：打击乐（噪音模拟 hi-hat / snare）— 走 masterGain
     function playDrum(startTime, type) {
-      const bufSize = ctx.sampleRate * (type === 'snare' ? 0.06 : 0.03);
-      const buffer = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      const ctx2 = getAudioCtx();
+      const bufSize = ctx2.sampleRate * (type === 'snare' ? 0.06 : 0.03);
+      const buffer = ctx2.createBuffer(1, bufSize, ctx2.sampleRate);
       const data = buffer.getChannelData(0);
       for (let i = 0; i < bufSize; i++) {
         if (type === 'hat') {
-          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.008));
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx2.sampleRate * 0.008));
         } else {
-          // snare: noise + tone
-          const noise = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.03));
-          const tone = Math.sin(i * 0.28) * Math.exp(-i / (ctx.sampleRate * 0.015)) * 0.4;
+          const noise = (Math.random() * 2 - 1) * Math.exp(-i / (ctx2.sampleRate * 0.03));
+          const tone = Math.sin(i * 0.28) * Math.exp(-i / (ctx2.sampleRate * 0.015)) * 0.4;
           data[i] = noise * 0.9 + tone;
         }
       }
-      const src = ctx.createBufferSource();
+      const src = ctx2.createBufferSource();
       src.buffer = buffer;
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(type === 'snare' ? 0.45 : 0.25, startTime);
+      const gain = ctx2.createGain();
+      gain.gain.setValueAtTime(type === 'snare' ? 0.35 : 0.2, startTime);
       gain.gain.exponentialRampToValueAtTime(0.001, startTime + (type === 'snare' ? 0.06 : 0.03));
       src.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(masterGainNode || ctx2.destination);
       src.start(startTime);
     }
 
@@ -1703,9 +1701,9 @@ function playGameMusic() {
       seqTime = now;
       leadMelody.forEach(n => {
         if (n) {
-          playNote(n.f, seqTime, n.d * 0.9, 'square', 0.04, undefined);
+          playMusicNote(n.f, seqTime, n.d * 0.9, 'square', 0.03);
           // harmony 5th above
-          playNote(n.f * 1.5, seqTime, n.d * 0.85, 'triangle', 0.014, undefined);
+          playMusicNote(n.f * 1.5, seqTime, n.d * 0.85, 'triangle', 0.01);
         }
         seqTime += n ? n.d : eighth;
       });
@@ -1714,7 +1712,7 @@ function playGameMusic() {
       seqTime = now;
       bassLine.forEach(n => {
         if (n) {
-          playNote(n.f, seqTime, n.d * 0.85, 'sawtooth', 0.05, undefined);
+          playMusicNote(n.f, seqTime, n.d * 0.85, 'sawtooth', 0.04);
         }
         seqTime += n ? n.d : beat;
       });
@@ -1740,7 +1738,7 @@ function playGameMusic() {
       ];
       chordPattern.forEach(c => {
         c.notes.forEach(nf => {
-          playNote(nf, now + c.pos, beat * 1.6, 'triangle', 0.022, undefined);
+          playMusicNote(nf, now + c.pos, beat * 1.6, 'triangle', 0.016);
         });
       });
 
@@ -1788,11 +1786,22 @@ function switchMusicForScene(sceneNum) {
 // ============================================
 let bgmAutoStarted = false;
 
-function initAutoBGM() {
+async function initAutoBGM() {
   if (bgmAutoStarted) return;
   bgmAutoStarted = true;
-  playBirthdayMusic();
-  document.getElementById('musicToggle').textContent = '🎵';
+
+  // 必须在用户手势回调内同步创建+resume AudioContext（手机浏览器严格要求）
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') {
+    await ctx.resume();
+  }
+
+  // 给 AudioContext 一点时间完全启动
+  setTimeout(() => {
+    playBirthdayMusic();
+    document.getElementById('musicToggle').textContent = '🎵';
+  }, 50);
+
   // 移除监听器
   document.removeEventListener('click', initAutoBGM);
   document.removeEventListener('touchstart', initAutoBGM);
@@ -1805,10 +1814,10 @@ document.addEventListener('touchstart', initAutoBGM);
 document.addEventListener('keydown', initAutoBGM);
 
 // BGM 按钮事件（切换开关）
-document.getElementById('musicToggle').addEventListener('click', (e) => {
-  e.stopPropagation(); // 防止触发 initAutoBGM
+document.getElementById('musicToggle').addEventListener('click', async (e) => {
+  e.stopPropagation();
   if (!bgmAutoStarted) {
-    initAutoBGM();
+    await initAutoBGM();
     return;
   }
   if (musicPlaying) {
