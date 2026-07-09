@@ -65,74 +65,98 @@ html, body {
 }
 
 /* ============================================
-   CSS 蛋仔角色
+   CSS 蛋仔角色 — 蛋小黄风格
    ============================================ */
 .egg-character {
   position: relative;
-  width: 70px; height: 88px;
-  background: linear-gradient(180deg, #FFE082 0%, #FFD54F 40%, #F9A825 100%);
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  width: 80px; height: 82px;
+  background: linear-gradient(180deg, #FFD54F 0%, #FFB300 25%, #FF8F00 60%, #E65100 100%);
+  border-radius: 50%;
   box-shadow:
-    inset -8px -4px 12px rgba(0,0,0,0.08),
-    inset 4px -8px 16px rgba(0,0,0,0.06),
-    0 4px 12px rgba(0,0,0,0.12);
+    inset -5px -3px 10px rgba(0,0,0,0.12),
+    inset -2px 5px 6px rgba(255,255,255,0.2),
+    0 6px 18px rgba(0,0,0,0.15);
 }
+/* 头顶高光 */
 .egg-character::before {
   content: '';
   position: absolute;
-  top: 8px; left: 50%; transform: translateX(-50%);
-  width: 34px; height: 16px;
-  background: rgba(255,255,255,0.5);
+  top: 8%; left: 50%; transform: translateX(-50%);
+  width: 48%; height: 15%;
+  background: rgba(255,255,255,0.45);
   border-radius: 50%;
 }
-/* 眼睛 */
-.egg-eyes { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 44px; display: flex; justify-content: space-between; }
+/* 小手 */
+.egg-character::after {
+  content: '';
+  position: absolute;
+  bottom: 28%; left: -10px;
+  width: 16px; height: 13px;
+  background: linear-gradient(180deg, #FFB300, #F57C00);
+  border-radius: 50%;
+  box-shadow:
+    62px 0 0 0 #FFB300,
+    62px 0 0 1px rgba(0,0,0,0.06),
+    inset 0 -2px 3px rgba(0,0,0,0.08);
+}
+/* 眼睛（大白眼球+大黑瞳孔） */
+.egg-eyes { position: absolute; top: 28%; left: 50%; transform: translateX(-50%); width: 54px; display: flex; justify-content: space-between; }
 .egg-eye {
-  width: 12px; height: 14px;
-  background: #3E2723; border-radius: 50%;
+  width: 21px; height: 23px;
+  background: white; border-radius: 50%;
   position: relative;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   animation: blink 3s infinite;
+}
+.egg-eye::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 12px; height: 14px;
+  background: #2C1810; border-radius: 50%;
 }
 .egg-eye::after {
   content: '';
   position: absolute;
-  top: 2px; left: 2px;
-  width: 4px; height: 4px;
+  top: 25%; left: 55%;
+  width: 5px; height: 5px;
   background: white; border-radius: 50%;
 }
 /* 腮红 */
 .egg-blush {
   position: absolute;
-  top: 36px;
-  width: 12px; height: 7px;
-  background: rgba(255,154,162,0.6);
+  top: 42%;
+  width: 14px; height: 9px;
+  background: rgba(255,138,128,0.45);
   border-radius: 50%;
+  filter: blur(1px);
 }
-.egg-blush.left { left: 8px; }
-.egg-blush.right { right: 8px; }
-/* 嘴巴 */
+.egg-blush.left { left: 1px; }
+.egg-blush.right { right: 1px; }
+/* 嘴巴（小小可爱的） */
 .egg-mouth {
   position: absolute;
-  top: 40px; left: 50%; transform: translateX(-50%);
-  width: 10px; height: 5px;
-  border-bottom: 2px solid #BF7B5A;
+  top: 48%; left: 50%; transform: translateX(-50%);
+  width: 7px; height: 4px;
+  border-bottom: 2px solid #8D6E63;
   border-radius: 0 0 50% 50%;
 }
-/* 小脚 */
+/* 小脚（圆滚滚） */
 .egg-feet {
   position: absolute;
-  bottom: -6px; left: 50%; transform: translateX(-50%);
-  width: 32px; display: flex; justify-content: space-between;
+  bottom: -5px; left: 50%; transform: translateX(-50%);
+  width: 36px; display: flex; justify-content: space-between;
 }
 .egg-foot {
-  width: 12px; height: 8px;
-  background: #F9A825;
-  border-radius: 50% 50% 30% 30%;
+  width: 15px; height: 10px;
+  background: #E65100;
+  border-radius: 50%;
+  box-shadow: 0 3px 4px rgba(0,0,0,0.1);
 }
 
 @keyframes blink {
   0%, 90%, 100% { transform: scaleY(1); }
-  95% { transform: scaleY(0.1); }
+  95% { transform: scaleY(0.08); }
 }
 
 /* 弹跳动画 */
@@ -156,7 +180,7 @@ html, body {
 #scene1 .egg-character {
   animation: dropIn 1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards,
              wobble 0.5s ease-in-out 1s 3;
-  width: 90px; height: 112px;
+  width: 110px; height: 112px;
 }
 @keyframes dropIn {
   0% { transform: translateY(-120vh); opacity: 0; }
@@ -222,15 +246,28 @@ html, body {
 /* 蛋仔 on top */
 .cake-egg {
   position: absolute; top: -70px; left: 50%; transform: translateX(-50%);
-  width: 50px; height: 62px;
-  background: linear-gradient(180deg, #FFE082 0%, #FFD54F 40%, #F9A825 100%);
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 56px; height: 58px;
+  background: linear-gradient(180deg, #FFD54F 0%, #FFB300 30%, #FF8F00 65%, #E65100 100%);
+  border-radius: 50%;
+  box-shadow:
+    inset -3px -2px 6px rgba(0,0,0,0.1),
+    inset -1px 3px 4px rgba(255,255,255,0.15),
+    0 4px 10px rgba(0,0,0,0.12);
+}
+/* 蛋糕蛋仔——小手 */
+.cake-egg::after {
+  content: '';
+  position: absolute;
+  bottom: 26%; left: -6px;
+  width: 12px; height: 10px;
+  background: linear-gradient(180deg, #FFB300, #F57C00);
+  border-radius: 50%;
+  box-shadow: 44px 0 0 0 #FFB300;
 }
 /* 蜡烛 */
 .candles-area {
   display: flex; justify-content: center; gap: 10px;
-  position: absolute; top: -55px; left: 50%; transform: translateX(-50%);
+  position: absolute; top: -85px; left: 50%; transform: translateX(-50%);
   width: 100%;
 }
 .candle {
@@ -263,7 +300,7 @@ html, body {
 
 .cake-msg {
   font-size: 15px; color: var(--text);
-  text-align: center; margin-top: 70px;
+  text-align: center; margin-top: 85px;
   font-weight: 600;
 }
 
@@ -488,7 +525,7 @@ html, body {
    响应式
    ============================================ */
 @media (min-width: 600px) {
-  .egg-character { width: 100px; height: 124px; }
+  .egg-character { width: 110px; height: 112px; }
   .cake { width: 240px; }
   .gifts-grid { max-width: 400px; gap: 24px; }
   .gift-box { width: 150px; height: 150px; font-size: 60px; }
@@ -505,7 +542,7 @@ html, body {
 <div class="confetti-container" id="confettiContainer"></div>
 
 <!-- BGM 按钮 -->
-<button class="music-toggle" id="musicToggle" title="音乐">🔇</button>
+<button class="music-toggle" id="musicToggle" title="音乐">🎵</button>
 
 <!-- ==================== 场景1：开场 ==================== -->
 <div class="scene active" id="scene1">
@@ -537,13 +574,13 @@ html, body {
     <div class="cake">
       <!-- 蛋仔 -->
       <div class="cake-egg" id="cakeEgg">
-        <div class="egg-eyes" style="top:14px;width:32px;">
-          <div class="egg-eye" style="width:9px;height:11px;"></div>
-          <div class="egg-eye" style="width:9px;height:11px;"></div>
+        <div class="egg-eyes" style="top:15px;width:37px;">
+          <div class="egg-eye" style="width:14px;height:15px;"></div>
+          <div class="egg-eye" style="width:14px;height:15px;"></div>
         </div>
-        <div class="egg-blush left" style="top:28px;left:5px;width:9px;height:5px;"></div>
-        <div class="egg-blush right" style="top:28px;right:5px;width:9px;height:5px;"></div>
-        <div class="egg-mouth" style="top:30px;width:7px;height:4px;"></div>
+        <div class="egg-blush left" style="top:23px;left:0;width:9px;height:6px;"></div>
+        <div class="egg-blush right" style="top:23px;right:0;width:9px;height:6px;"></div>
+        <div class="egg-mouth" style="top:28px;width:6px;height:3px;"></div>
       </div>
       <!-- 蜡烛 -->
       <div class="candles-area" id="candlesArea"></div>
@@ -677,8 +714,13 @@ function goToScene(n) {
   // 进入场景时的特殊逻辑
   if (n === 2) initCandles();
   if (n === 3) { document.getElementById('giftNextBtn').style.display = 'none'; }
-  if (n === 4) initGame();
+  if (n === 4) { initGame(); }
   if (n === 5) startBlessingWall();
+
+  // 场景切换时自动切换 BGM（场景4用游戏局内音效，其余用生日快乐歌）
+  if (bgmAutoStarted && musicPlaying) {
+    switchMusicForScene(n);
+  }
 
   // 滚动到顶部（mobile）
   window.scrollTo(0, 0);
@@ -989,57 +1031,74 @@ function drawGameFrame() {
     gctx.fillText(item.emoji, item.x, item.y);
   });
 
-  // 蛋仔
+  // 蛋小黄
   const ey = canvasH - 70;
   const ex = gameEggX;
   const ew = gameEggW;
-  const eh = ew * 1.25;
+  const eh = ew * 1.02; // 近乎正圆
 
-  // 身体
+  // 身体（正圆形）
+  const cx = ex + ew / 2;
+  const cy = ey + eh / 2;
   gctx.beginPath();
-  gctx.ellipse(ex + ew / 2, ey + eh * 0.45, ew / 2, eh / 2, 0, 0, Math.PI * 2);
+  gctx.arc(cx, cy, ew / 2, 0, Math.PI * 2);
   const gradient = gctx.createLinearGradient(ex, ey, ex, ey + eh);
-  gradient.addColorStop(0, '#FFE082');
-  gradient.addColorStop(0.5, '#FFD54F');
-  gradient.addColorStop(1, '#F9A825');
+  gradient.addColorStop(0, '#FFD54F');
+  gradient.addColorStop(0.25, '#FFB300');
+  gradient.addColorStop(0.65, '#FF8F00');
+  gradient.addColorStop(1, '#E65100');
   gctx.fillStyle = gradient;
   gctx.fill();
-  gctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  gctx.strokeStyle = 'rgba(0,0,0,0.06)';
   gctx.lineWidth = 1;
   gctx.stroke();
 
-  // 高光
+  // 头顶高光
   gctx.beginPath();
-  gctx.ellipse(ex + ew / 2, ey + eh * 0.22, ew * 0.22, eh * 0.12, 0, 0, Math.PI * 2);
-  gctx.fillStyle = 'rgba(255,255,255,0.5)';
+  gctx.ellipse(cx, ey + eh * 0.15, ew * 0.2, eh * 0.08, 0, 0, Math.PI * 2);
+  gctx.fillStyle = 'rgba(255,255,255,0.45)';
   gctx.fill();
 
-  // 眼睛
-  const eyeY = ey + eh * 0.28;
-  gctx.fillStyle = '#3E2723';
-  gctx.beginPath(); gctx.arc(ex + ew * 0.32, eyeY, ew * 0.1, 0, Math.PI * 2); gctx.fill();
-  gctx.beginPath(); gctx.arc(ex + ew * 0.68, eyeY, ew * 0.1, 0, Math.PI * 2); gctx.fill();
+  // 小手
+  gctx.fillStyle = '#FFB300';
+  gctx.beginPath(); gctx.arc(ex - ew * 0.06, ey + eh * 0.6, ew * 0.1, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 1.06, ey + eh * 0.6, ew * 0.1, 0, Math.PI * 2); gctx.fill();
+
+  // 眼睛（大白眼球）
+  const eyeY = cy - eh * 0.04;
+  gctx.fillStyle = 'white';
+  gctx.beginPath(); gctx.arc(ex + ew * 0.3, eyeY, ew * 0.15, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.7, eyeY, ew * 0.15, 0, Math.PI * 2); gctx.fill();
+  // 眼球边框
+  gctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  gctx.lineWidth = 0.5;
+  gctx.stroke();
+
+  // 瞳孔
+  gctx.fillStyle = '#2C1810';
+  gctx.beginPath(); gctx.arc(ex + ew * 0.3, eyeY, ew * 0.085, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.7, eyeY, ew * 0.085, 0, Math.PI * 2); gctx.fill();
   // 高光
   gctx.fillStyle = 'white';
-  gctx.beginPath(); gctx.arc(ex + ew * 0.35, eyeY - ew * 0.03, ew * 0.035, 0, Math.PI * 2); gctx.fill();
-  gctx.beginPath(); gctx.arc(ex + ew * 0.71, eyeY - ew * 0.03, ew * 0.035, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.33, eyeY - ew * 0.03, ew * 0.035, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.73, eyeY - ew * 0.03, ew * 0.035, 0, Math.PI * 2); gctx.fill();
 
   // 腮红
-  gctx.fillStyle = 'rgba(255,154,162,0.5)';
-  gctx.beginPath(); gctx.ellipse(ex + ew * 0.15, ey + eh * 0.42, ew * 0.09, eh * 0.06, 0, 0, Math.PI * 2); gctx.fill();
-  gctx.beginPath(); gctx.ellipse(ex + ew * 0.85, ey + eh * 0.42, ew * 0.09, eh * 0.06, 0, 0, Math.PI * 2); gctx.fill();
+  gctx.fillStyle = 'rgba(255,138,128,0.35)';
+  gctx.beginPath(); gctx.ellipse(ex + ew * 0.08, ey + eh * 0.46, ew * 0.09, eh * 0.06, 0, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.ellipse(ex + ew * 0.92, ey + eh * 0.46, ew * 0.09, eh * 0.06, 0, 0, Math.PI * 2); gctx.fill();
 
   // 嘴巴
-  gctx.strokeStyle = '#BF7B5A';
+  gctx.strokeStyle = '#8D6E63';
   gctx.lineWidth = 1.5;
   gctx.beginPath();
-  gctx.arc(ex + ew / 2, ey + eh * 0.46, ew * 0.08, 0.1 * Math.PI, 0.9 * Math.PI);
+  gctx.arc(cx, cy + eh * 0.06, ew * 0.06, 0.15 * Math.PI, 0.85 * Math.PI);
   gctx.stroke();
 
   // 小脚
-  gctx.fillStyle = '#F9A825';
-  gctx.beginPath(); gctx.ellipse(ex + ew * 0.28, ey + eh * 0.95, ew * 0.11, eh * 0.07, 0, 0, Math.PI * 2); gctx.fill();
-  gctx.beginPath(); gctx.ellipse(ex + ew * 0.72, ey + eh * 0.95, ew * 0.11, eh * 0.07, 0, 0, Math.PI * 2); gctx.fill();
+  gctx.fillStyle = '#E65100';
+  gctx.beginPath(); gctx.arc(ex + ew * 0.28, ey + eh - ew * 0.04, ew * 0.09, 0, Math.PI * 2); gctx.fill();
+  gctx.beginPath(); gctx.arc(ex + ew * 0.72, ey + eh - ew * 0.04, ew * 0.09, 0, Math.PI * 2); gctx.fill();
 
   // 地面线
   gctx.strokeStyle = 'rgba(0,0,0,0.06)';
@@ -1191,14 +1250,18 @@ confettiStyle.textContent = `
 document.head.appendChild(confettiStyle);
 
 // ============================================
-// 音频系统（Web Audio API 简易音效）
+// 音频系统（Web Audio API）
 // ============================================
 let audioCtx = null;
 let musicPlaying = false;
+let musicType = 'birthday'; // 'birthday' | 'game'
 let musicOscillators = [];
+let musicGainNode = null;
 
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // Resume if suspended (browser autoplay policy)
+  if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
 
@@ -1241,13 +1304,20 @@ function celebrateSound() {
   } catch (e) {}
 }
 
-// 简易生日快乐歌 BGM
+// 清除所有音乐定时器
+function clearMusicTimers() {
+  musicOscillators.forEach(t => clearTimeout(t));
+  musicOscillators = [];
+}
+
+// 生日快乐歌 BGM（场景1-3、5 使用）
 function playBirthdayMusic() {
-  if (musicPlaying) return;
+  if (musicPlaying && musicType === 'birthday') return;
+  clearMusicTimers();
   musicPlaying = true;
+  musicType = 'birthday';
   try {
     const ctx = getAudioCtx();
-    // 生日快乐歌旋律 (简化版)
     const melody = [
       { freq: 392, dur: 0.35 }, { freq: 392, dur: 0.35 }, { freq: 440, dur: 0.5 },
       { freq: 392, dur: 0.5 }, { freq: 523, dur: 0.5 }, { freq: 494, dur: 0.8 },
@@ -1264,7 +1334,7 @@ function playBirthdayMusic() {
 
     let time = ctx.currentTime;
     function playLoop() {
-      if (!musicPlaying) return;
+      if (!musicPlaying || musicType !== 'birthday') return;
       time = ctx.currentTime;
       melody.forEach(note => {
         if (!note) { time += 0.35; return; }
@@ -1284,7 +1354,82 @@ function playBirthdayMusic() {
       musicOscillators.push(setTimeout(playLoop, (time - ctx.currentTime) * 1000));
     }
     playLoop();
-    document.getElementById('musicToggle').textContent = '🎵';
+  } catch (e) {
+    musicPlaying = false;
+  }
+}
+
+// 蛋仔派对局内风格 BGM（场景4 游戏使用）— 轻快活泼
+function playGameMusic() {
+  if (musicPlaying && musicType === 'game') return;
+  clearMusicTimers();
+  musicPlaying = true;
+  musicType = 'game';
+  try {
+    const ctx = getAudioCtx();
+    // 活泼跳跃的蛋仔派对风格旋律，较快 tempo
+    const melody = [
+      // 主旋律 — 欢快跳跃
+      { freq: 523, dur: 0.18 }, { freq: 587, dur: 0.18 }, { freq: 659, dur: 0.18 },
+      { freq: 784, dur: 0.28 }, null, { freq: 659, dur: 0.18 },
+      { freq: 784, dur: 0.28 }, null, { freq: 880, dur: 0.18 },
+      { freq: 784, dur: 0.18 }, { freq: 659, dur: 0.18 }, { freq: 587, dur: 0.28 },
+      null, { freq: 523, dur: 0.18 }, { freq: 659, dur: 0.18 },
+      // 第二段
+      { freq: 784, dur: 0.28 }, null, { freq: 659, dur: 0.18 },
+      { freq: 784, dur: 0.18 }, { freq: 880, dur: 0.18 }, { freq: 988, dur: 0.28 },
+      null, { freq: 880, dur: 0.18 }, { freq: 784, dur: 0.18 },
+      { freq: 659, dur: 0.28 }, { freq: 587, dur: 0.18 }, { freq: 523, dur: 0.28 },
+      // 跳跃段
+      null, { freq: 523, dur: 0.14 }, { freq: 494, dur: 0.14 },
+      { freq: 523, dur: 0.14 }, { freq: 440, dur: 0.14 }, { freq: 523, dur: 0.14 },
+      { freq: 587, dur: 0.14 }, { freq: 659, dur: 0.14 }, { freq: 784, dur: 0.14 },
+      { freq: 880, dur: 0.22 }, null, { freq: 784, dur: 0.14 },
+      { freq: 659, dur: 0.22 }, null, { freq: 523, dur: 0.14 },
+      { freq: 587, dur: 0.22 }, null, { freq: 659, dur: 0.22 },
+      // 结尾
+      null, null, null,
+      { freq: 659, dur: 0.18 }, { freq: 784, dur: 0.18 },
+      { freq: 988, dur: 0.28 }, null, { freq: 880, dur: 0.18 },
+      { freq: 784, dur: 0.28 }, { freq: 659, dur: 0.28 },
+      null, null, null, null, null,
+    ];
+
+    let time = ctx.currentTime;
+    function playLoop() {
+      if (!musicPlaying || musicType !== 'game') return;
+      time = ctx.currentTime;
+      melody.forEach(note => {
+        if (!note) { time += 0.16; return; }
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        // 加入一点和声让音色更饱满
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(note.freq * 0.5, time);
+        gain2.gain.setValueAtTime(0, time);
+        gain2.gain.linearRampToValueAtTime(0.03, time + 0.02);
+        gain2.gain.exponentialRampToValueAtTime(0.001, time + note.dur);
+        osc2.start(time);
+        osc2.stop(time + note.dur + 0.03);
+
+        osc.frequency.setValueAtTime(note.freq, time);
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.06, time + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + note.dur);
+        osc.start(time);
+        osc.stop(time + note.dur + 0.03);
+        time += note.dur + 0.02;
+      });
+      musicOscillators.push(setTimeout(playLoop, (time - ctx.currentTime) * 1000));
+    }
+    playLoop();
   } catch (e) {
     musicPlaying = false;
   }
@@ -1292,17 +1437,53 @@ function playBirthdayMusic() {
 
 function stopMusic() {
   musicPlaying = false;
-  musicOscillators.forEach(t => clearTimeout(t));
-  musicOscillators = [];
-  document.getElementById('musicToggle').textContent = '🔇';
+  musicType = '';
+  clearMusicTimers();
 }
 
-// BGM 按钮事件
-document.getElementById('musicToggle').addEventListener('click', () => {
-  if (musicPlaying) {
-    stopMusic();
+// 切换音乐：根据场景自动选择
+function switchMusicForScene(sceneNum) {
+  if (sceneNum === 4) {
+    playGameMusic();
   } else {
     playBirthdayMusic();
+  }
+}
+
+// ============================================
+// 初始化：首次用户交互时自动开启 BGM
+// ============================================
+let bgmAutoStarted = false;
+
+function initAutoBGM() {
+  if (bgmAutoStarted) return;
+  bgmAutoStarted = true;
+  playBirthdayMusic();
+  document.getElementById('musicToggle').textContent = '🎵';
+  // 移除监听器
+  document.removeEventListener('click', initAutoBGM);
+  document.removeEventListener('touchstart', initAutoBGM);
+  document.removeEventListener('keydown', initAutoBGM);
+}
+
+// 全局监听首次交互
+document.addEventListener('click', initAutoBGM);
+document.addEventListener('touchstart', initAutoBGM);
+document.addEventListener('keydown', initAutoBGM);
+
+// BGM 按钮事件（切换开关）
+document.getElementById('musicToggle').addEventListener('click', (e) => {
+  e.stopPropagation(); // 防止触发 initAutoBGM
+  if (!bgmAutoStarted) {
+    initAutoBGM();
+    return;
+  }
+  if (musicPlaying) {
+    stopMusic();
+    document.getElementById('musicToggle').textContent = '🔇';
+  } else {
+    switchMusicForScene(currentScene);
+    document.getElementById('musicToggle').textContent = '🎵';
   }
 });
 
