@@ -569,14 +569,15 @@ html, body {
 }
 .blessing-bubble {
   position: absolute;
-  padding: 12px 20px;
-  border-radius: 24px;
-  font-size: 15px;
+  padding: 10px 16px;
+  border-radius: 22px;
+  font-size: 14px;
   font-weight: 600;
   color: white;
-  max-width: 88vw;
-  white-space: normal;
-  word-break: break-word;
+  max-width: 70vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   animation: floatUpBubble linear forwards;
   pointer-events: none;
@@ -909,12 +910,12 @@ function goToScene(n) {
   if (n === 4) { initGame(); }
   if (n === 5) startBlessingWall();
 
-  // 场景切换时立刻切换 BGM（无重叠）
+  // BGM 切换：只在进出游戏场景时切换，其他场景保持不变
   if (bgmAutoStarted) {
-    if (n === 4) {
+    if (n === 4 && musicType !== 'game') {
       stopMusic();
       setTimeout(() => playGameMusic(), 30);
-    } else {
+    } else if (n !== 4 && currentScene === 4 && musicType !== 'birthday') {
       stopMusic();
       setTimeout(() => playBirthdayMusic(), 30);
     }
@@ -1403,14 +1404,13 @@ function startBlessingWall() {
     bubble.className = 'blessing-bubble';
     bubble.textContent = msg;
     bubble.style.background = colors[(idx || Math.floor(Math.random() * colors.length)) % colors.length];
-    // 水平位置：居中分布，远离右边缘（手机安全）
-    bubble.style.left = (Math.random() * 55 + 5) + '%'; // 5% ~ 60%
-    bubble.style.transform = 'translateX(-50%)'; // 以气泡中心定位，两端都不会溢出
-    // 垂直起始位置均匀分布
+    // 水平位置：0%~35%，配合 max-width:70vw 确保永远不超出右边界
+    bubble.style.left = (Math.random() * 32 + 2) + '%';
+    // 垂直起始均匀分布
     const startPercent = Math.random() * 85 + 10;
     bubble.style.setProperty('--bubble-start', startPercent + '%');
     bubble.style.animationDuration = (Math.random() * 5 + 8) + 's';
-    bubble.style.fontSize = (Math.random() * 4 + 14) + 'px';
+    bubble.style.fontSize = (Math.random() * 3 + 13) + 'px';
     wall.appendChild(bubble);
 
     const dur = parseFloat(bubble.style.animationDuration) * 1000;
