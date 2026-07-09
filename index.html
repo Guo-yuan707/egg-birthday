@@ -531,29 +531,31 @@ html, body {
   touch-action: none;
 }
 .game-controls {
-  margin-top: 12px;
+  margin-top: 16px;
   display: flex; justify-content: space-between; align-items: center;
-  width: 100%; max-width: 360px;
-  gap: 8px;
+  width: 100%; max-width: 380px;
+  padding: 0 8px;
 }
 .game-btn {
-  width: 62px; height: 62px;
+  width: 74px; height: 74px;
   border-radius: 50%;
   border: none;
-  font-size: 30px;
+  font-size: 36px;
   background: white;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
   cursor: pointer;
   transition: transform 0.1s ease;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 .game-btn.play-btn {
-  width: 52px; height: 52px;
-  font-size: 22px;
+  width: 56px; height: 56px;
+  font-size: 24px;
   background: linear-gradient(135deg, var(--sky-blue), #42A5F5);
   color: white;
+  box-shadow: 0 6px 16px rgba(66,165,245,0.3);
 }
-.game-btn:active { transform: scale(0.9); }
+.game-btn:active { transform: scale(0.92); }
 
 /* ============================================
    场景5：祝福墙 — 全屏分布
@@ -682,6 +684,9 @@ html, body {
 
 <!-- 彩带容器 -->
 <div class="confetti-container" id="confettiContainer"></div>
+
+<!-- 静默音频解锁（绕过移动端 autoplay 限制） -->
+<audio id="audioUnlock" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" autoplay playsinline muted style="display:none"></audio>
 
 <!-- BGM 按钮 -->
 <button class="music-toggle" id="musicToggle" title="音乐">🎵</button>
@@ -902,9 +907,15 @@ function goToScene(n) {
   if (n === 4) { initGame(); }
   if (n === 5) startBlessingWall();
 
-  // 场景切换时自动切换 BGM（场景4用游戏局内音效，其余用生日快乐歌）
-  if (bgmAutoStarted && musicPlaying) {
-    switchMusicForScene(n);
+  // 场景切换时立刻切换 BGM（无重叠）
+  if (bgmAutoStarted) {
+    if (n === 4) {
+      stopMusic();
+      setTimeout(() => playGameMusic(), 30);
+    } else {
+      stopMusic();
+      setTimeout(() => playBirthdayMusic(), 30);
+    }
   }
 
   // 滚动到顶部（mobile）
@@ -1458,47 +1469,64 @@ confettiStyle.textContent = `
 document.head.appendChild(confettiStyle);
 
 // ============================================
-// 音频系统（Web Audio API）
+// 音频系统（Web Audio API）— 重构版
 // ============================================
 let audioCtx = null;
 let musicPlaying = false;
-let musicType = 'birthday'; // 'birthday' | 'game'
+let musicType = '';
 let musicOscillators = [];
-let masterGainNode = null;   // 主音量控制节点
+let activeAudioNodes = [];  // 追踪所有正在发声的节点
+let masterGainNode = null;
 
 function getAudioCtx() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // 创建主增益节点，所有音乐通过它输出，统一控制音量
     masterGainNode = audioCtx.createGain();
     masterGainNode.connect(audioCtx.destination);
   }
-  // Resume if suspended (browser autoplay policy)
-  if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
 
-// 辅助：播放一个音符（通过 masterGain 输出，可统一调音量）
+// 立即停止所有正在播放的音频
+function stopAllAudio() {
+  activeAudioNodes.forEach(node => {
+    try { node.stop(0); } catch (e) {}
+  });
+  activeAudioNodes = [];
+  musicOscillators.forEach(t => clearTimeout(t));
+  musicOscillators = [];
+  musicPlaying = false;
+  musicType = '';
+}
+
+// 播放一个音符并追踪
 function playMusicNote(freq, startTime, duration, type, vol) {
   const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') return;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, startTime);
   gain.gain.setValueAtTime(0, startTime);
-  gain.gain.linearRampToValueAtTime(vol, startTime + 0.015);
+  gain.gain.linearRampToValueAtTime(vol, startTime + 0.008);
   gain.gain.setValueAtTime(vol, startTime + duration * 0.7);
   gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
   osc.connect(gain);
   gain.connect(masterGainNode || ctx.destination);
   osc.start(startTime);
   osc.stop(startTime + duration + 0.05);
+  activeAudioNodes.push(osc);
+  osc.onended = () => {
+    const i = activeAudioNodes.indexOf(osc);
+    if (i > -1) activeAudioNodes.splice(i, 1);
+  };
 }
 
 // 音效：弹出声
 function popSound(freq = 600) {
   try {
     const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -1510,6 +1538,8 @@ function popSound(freq = 600) {
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.15);
+    activeAudioNodes.push(osc);
+    osc.onended = () => { const i = activeAudioNodes.indexOf(osc); if (i > -1) activeAudioNodes.splice(i, 1); };
   } catch (e) {}
 }
 
@@ -1517,7 +1547,8 @@ function popSound(freq = 600) {
 function celebrateSound() {
   try {
     const ctx = getAudioCtx();
-    const notes = [523, 659, 784, 1047]; // C E G C
+    if (ctx.state === 'suspended') return;
+    const notes = [523, 659, 784, 1047];
     notes.forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -1530,29 +1561,38 @@ function celebrateSound() {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.25);
       osc.start(ctx.currentTime + i * 0.12);
       osc.stop(ctx.currentTime + i * 0.12 + 0.25);
+      activeAudioNodes.push(osc);
+      osc.onended = () => { const i = activeAudioNodes.indexOf(osc); if (i > -1) activeAudioNodes.splice(i, 1); };
     });
   } catch (e) {}
 }
 
-// 清除所有音乐定时器
-function clearMusicTimers() {
+// 停止音乐但不停止音效
+function stopMusic() {
+  musicPlaying = false;
+  musicType = '';
   musicOscillators.forEach(t => clearTimeout(t));
   musicOscillators = [];
+  // 立即停止所有活跃的音乐节点
+  activeAudioNodes.forEach(node => {
+    try { node.stop(0); } catch (e) {}
+  });
+  activeAudioNodes = [];
+  document.getElementById('musicToggle').textContent = '🔇';
 }
 
-// 生日快乐歌 BGM（场景1-3、5 使用）— masterGain 推高
+// 生日快乐歌 BGM（场景1-3、5 使用）
 function playBirthdayMusic() {
   if (musicPlaying && musicType === 'birthday') return;
-  clearMusicTimers();
+  stopMusic();
   musicPlaying = true;
   musicType = 'birthday';
   try {
     const ctx = getAudioCtx();
-    // 生日歌用较高 masterGain
+    if (ctx.state === 'suspended') { musicPlaying = false; musicType = ''; return; }
     if (masterGainNode) {
       masterGainNode.gain.cancelScheduledValues(ctx.currentTime);
-      masterGainNode.gain.setValueAtTime(masterGainNode.gain.value, ctx.currentTime);
-      masterGainNode.gain.linearRampToValueAtTime(1.3, ctx.currentTime + 0.1);
+      masterGainNode.gain.setValueAtTime(1.3, ctx.currentTime);
     }
 
     const melody = [
@@ -1589,19 +1629,17 @@ function playBirthdayMusic() {
 }
 
 // 蛋仔派对局内风格 BGM（场景4 游戏使用）
-// 风格：日系清新电子/chiptune，快节奏 ~150BPM，多层音轨
 function playGameMusic() {
   if (musicPlaying && musicType === 'game') return;
-  clearMusicTimers();
+  stopMusic();
   musicPlaying = true;
   musicType = 'game';
   try {
     const ctx = getAudioCtx();
-    // 游戏 BGM 多层音轨，降低 masterGain 防止手机扬声器过噪
+    if (ctx.state === 'suspended') { musicPlaying = false; musicType = ''; return; }
     if (masterGainNode) {
       masterGainNode.gain.cancelScheduledValues(ctx.currentTime);
-      masterGainNode.gain.setValueAtTime(masterGainNode.gain.value, ctx.currentTime);
-      masterGainNode.gain.linearRampToValueAtTime(0.75, ctx.currentTime + 0.1);
+      masterGainNode.gain.setValueAtTime(0.72, ctx.currentTime);
     }
 
     const bpm = 148;
@@ -1688,6 +1726,8 @@ function playGameMusic() {
       src.connect(gain);
       gain.connect(masterGainNode || ctx2.destination);
       src.start(startTime);
+      activeAudioNodes.push(src);
+      src.onended = () => { const i = activeAudioNodes.indexOf(src); if (i > -1) activeAudioNodes.splice(i, 1); };
     }
 
     // 主循环：播放所有音轨
@@ -1766,103 +1806,71 @@ function playGameMusic() {
   }
 }
 
-function stopMusic() {
-  musicPlaying = false;
-  musicType = '';
-  clearMusicTimers();
-}
-
-// 切换音乐：根据场景自动选择
-function switchMusicForScene(sceneNum) {
-  if (sceneNum === 4) {
-    playGameMusic();
-  } else {
-    playBirthdayMusic();
-  }
-}
 
 // ============================================
-// 初始化：页面加载即自动播放 BGM
+// 初始化：BGM 自动播放
 // ============================================
 let bgmAutoStarted = false;
 
-async function tryAutoPlay() {
+// 启动 BGM 的核心逻辑
+async function startBGM() {
   if (bgmAutoStarted) return;
-  bgmAutoStarted = true;
-
   const ctx = getAudioCtx();
 
-  // 尝试直接播放（桌面端通常成功，移动端需 resume）
-  if (ctx.state === 'suspended') {
-    try {
-      await ctx.resume();
-    } catch (e) {
-      // resume 失败 → 等用户手势
-      bgmAutoStarted = false;
-      return;
-    }
-  }
-
-  // 检查是否真的启动了
-  if (ctx.state === 'running') {
-    setTimeout(() => {
-      playBirthdayMusic();
-      document.getElementById('musicToggle').textContent = '🎵';
-      // 移除手势监听（已成功）
-      document.removeEventListener('click', fallbackGesture);
-      document.removeEventListener('touchstart', fallbackGesture);
-    }, 80);
-  } else {
-    // 仍然 suspended → 等用户手势
-    bgmAutoStarted = false;
-  }
-}
-
-// 备用：用户手势触发（移动端兜底）
-function fallbackGesture() {
-  if (bgmAutoStarted) return;
-  initAutoBGM();
-}
-
-async function initAutoBGM() {
-  if (bgmAutoStarted) return;
-  bgmAutoStarted = true;
-
-  const ctx = getAudioCtx();
+  // 确保 AudioContext 是 running 状态
   if (ctx.state === 'suspended') {
     try { await ctx.resume(); } catch (e) {}
   }
 
-  setTimeout(() => {
-    playBirthdayMusic();
-    document.getElementById('musicToggle').textContent = '🎵';
-  }, 50);
+  if (ctx.state !== 'running') return;
+
+  bgmAutoStarted = true;
+  playBirthdayMusic();
+  document.getElementById('musicToggle').textContent = '🎵';
+  document.removeEventListener('click', startBGM);
+  document.removeEventListener('touchstart', startBGM);
 }
 
-// 页面加载完成即尝试自动播放
-window.addEventListener('DOMContentLoaded', () => {
-  // 先尝试直接播放
-  setTimeout(tryAutoPlay, 100);
-});
+// 策略1：用静默 <audio> 元素解锁 Web Audio（iOS Safari 兼容）
+const unlockAudio = document.getElementById('audioUnlock');
+if (unlockAudio) {
+  unlockAudio.addEventListener('play', () => {
+    if (!bgmAutoStarted) {
+      getAudioCtx(); // 确保 AudioContext 已创建
+      startBGM();
+    }
+  }, { once: true });
+  // 立即尝试播放
+  unlockAudio.play().catch(() => {});
+}
 
-// 如果 autoplay 被挡，用户任意操作后启动
-document.addEventListener('click', fallbackGesture);
-document.addEventListener('touchstart', fallbackGesture);
-document.addEventListener('keydown', fallbackGesture);
+// 策略2：页面加载后立即创建 AudioContext + 尝试 resume
+(function immediateInit() {
+  const ctx = getAudioCtx(); // 立即创建（不等任何事件）
+  if (ctx.state === 'suspended') {
+    ctx.resume().then(() => {
+      if (ctx.state === 'running' && !bgmAutoStarted) startBGM();
+    }).catch(() => {});
+  } else if (ctx.state === 'running' && !bgmAutoStarted) {
+    startBGM();
+  }
+})();
 
-// BGM 按钮事件（切换开关）
+// 策略3：用户首次交互时兜底
+document.addEventListener('click', startBGM);
+document.addEventListener('touchstart', startBGM);
+
+// BGM 按钮事件
 document.getElementById('musicToggle').addEventListener('click', async (e) => {
   e.stopPropagation();
-  if (!bgmAutoStarted) {
-    await initAutoBGM();
-    return;
-  }
+  if (!bgmAutoStarted) { await startBGM(); return; }
   if (musicPlaying) {
     stopMusic();
-    document.getElementById('musicToggle').textContent = '🔇';
   } else {
-    switchMusicForScene(currentScene);
-    document.getElementById('musicToggle').textContent = '🎵';
+    stopMusic();
+    setTimeout(() => {
+      currentScene === 4 ? playGameMusic() : playBirthdayMusic();
+    }, 30);
   }
 });
 
